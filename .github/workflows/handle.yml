@@ -80,7 +80,7 @@ jobs:
           # DURATION: '${{ env.DEFAULT_DURATION }}'
           # Assume there is only one file
           IAM_FILE_PATH: '${{ steps.added-yaml-files.outputs.added_files }}'
-          START_TIME: '${{ github.event.review.submitted_at }}'
+          START_TIME: '${{ github.event.created }}'
         run: |
           DURATION=$(awk -F_ '{print $2}' <<< $IAM_FILE_PATH)
           aod iam handle -path $IAM_FILE_PATH -duration $DURATION -start-time $START_TIME
