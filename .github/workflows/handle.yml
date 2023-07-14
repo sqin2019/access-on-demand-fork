@@ -83,11 +83,7 @@ jobs:
           START_TIME: '${{ github.event.review.submitted_at }}'
         run: |
           DURATION=$(awk -F_ '{print $2}' <<< $IAM_FILE_PATH)
-          if [ -f "requests/iam.yaml" ]; then
-            aod iam handle -path $IAM_FILE_PATH -duration $DURATION -start-time $START_TIME
-          else
-            echo "::notice title=IAM Request Handle::Skip because iam.yaml is not found"
-          fi
+          aod iam handle -path $IAM_FILE_PATH -duration $DURATION -start-time $START_TIME
       # Request will not be handled when tool.yaml file does not exist in the
       # case of a pull_request_review event, instead it prints out a notice.
       - name: 'Handle CLI Request'
