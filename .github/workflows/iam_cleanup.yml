@@ -45,8 +45,9 @@ jobs:
     # Handle on merge
     runs-on: 'ubuntu-latest'
     permissions:
-      contents: 'read'
+      contents: 'write'
       id-token: 'write'
+      pull-requests: 'write'
     name: 'Handle Request'
     steps:
       - uses: 'actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab' # ratchet:actions/checkout@v3
@@ -84,18 +85,31 @@ jobs:
         run: |
           for file in requests; do
             mergeTime=$(git log -1 --format=%ci ${file})
-            duration=$(awk -F_ '{print $2}' <<< ${file})
-            expiry=$(date -u -d "${mergeTime} ${duration}" --rfc-3339=seconds)
-            if [[ ${current_time} -gt ${expiry} ]]; then
+            // duration=$(awk -F_ '{print $2}' <<< ${file})
+            // expiry=$(date -u -d "${mergeTime} ${duration}" --rfc-3339=seconds)
+            if [[ ${current_time} -gt ${mergeTime} ]]; then
               aod iam cleanup -path ${file}
               echo -e "Removing $file with IAM expiration $expiry"
               rm requests/${file}
               echo removed='true' >> $GITHUB_OUTPUT
             fi
           done
-      - name: Commit & Push changes
-        if: '${{ steps.remove_expired.outputs.removed == ''true'' }}'
-        uses: actions-js/push@master
+      - name: 'Create PR'
+        id: 'cpr'
+        if: '${{ steps.remove_expired.outputs.removed }}'
+        uses: 'peter-evans/create-pull-request@v5'
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          message: 'chore: Remove files with expired IAM'
+          commit-message: 'Remove expired AOD requests'
+          title: 'Remove expired AOD requests'
+      - name: 'Approve PR'
+        if: '${{ steps.cpr.outputs.pull-request-number }}'
+        uses: 'hmarr/auto-approve-action@v3'
+        with:
+          review-message: "Auto approved automated PR"
+          pull-request-number: '${{ steps.cpr.outputs.pull-request-number }}'
+      - name: 'Enable Pull Request Automerge'
+        if: '${{ steps.cpr.outputs.pull-request-number }}'
+        uses: 'peter-evans/enable-pull-request-automerge@v3'
+        with:
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+
