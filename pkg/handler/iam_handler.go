@@ -107,6 +107,24 @@ func (h *IAMHandler) Do(ctx context.Context, r *v1alpha1.IAMRequestWrapper) (nps
 	return
 }
 
+
+// Do removes expired or duplicative IAM bindings added by AOD and adds requested IAM bindings to current IAM policy.
+func (h *IAMHandler) Cleanup(ctx context.Context, r *v1alpha1.IAMRequestWrapper) (nps []*v1alpha1.IAMResponse, retErr error) {
+	for _, p := range r.ResourcePolicies {
+		np, err := h.handlePolicyCleanup(ctx, p)
+		if err != nil {
+			retErr = errors.Join(
+				retErr,
+				fmt.Errorf("failed to handle policy cleanup for resource %s: %w", p.Resource, err),
+			)
+		}
+		if np != nil {
+			nps = append(nps, np)
+		}
+	}
+	return
+}
+
 func (h *IAMHandler) handlePolicy(ctx context.Context, p *v1alpha1.ResourcePolicy, expiry time.Time) (*v1alpha1.IAMResponse, error) {
 	var iamC IAMClient
 	switch strings.Split(p.Resource, "/")[0] {
@@ -165,6 +183,61 @@ func (h *IAMHandler) handlePolicy(ctx context.Context, p *v1alpha1.ResourcePolic
 	return &v1alpha1.IAMResponse{Resource: p.Resource, Policy: np}, nil
 }
 
+func (h *IAMHandler) handlePolicyCleanup(ctx context.Context, p *v1alpha1.ResourcePolicy) (*v1alpha1.IAMResponse, error) {
+	var iamC IAMClient
+	switch strings.Split(p.Resource, "/")[0] {
+	case "organizations":
+		iamC = h.organizationsClient
+	case "folders":
+		iamC = h.foldersClient
+	case "projects":
+		iamC = h.projectsClient
+	default:
+		return nil, fmt.Errorf("resource isn't one of [organizations, folders, projects]")
+	}
+
+	var np *iampb.Policy
+	if err := retry.Do(ctx, h.retry, func(ctx context.Context) error {
+		// Get current IAM policy.
+		getIAMPolicyRequest := &iampb.GetIamPolicyRequest{
+			Resource: p.Resource,
+			// Set required policy version to 3 to support conditional IAM bindings
+			// in the requested policy.
+			// Note that if the requested policy does not contain conditional IAM
+			// bindings it will return the policy as is, which is version 1.
+			// See details here: https://cloud.google.com/iam/docs/policies#specifying-version-get
+			Options: &iampb.GetPolicyOptions{
+				RequestedPolicyVersion: 3,
+			},
+		}
+		cp, err := iamC.GetIamPolicy(ctx, getIAMPolicyRequest)
+		if err != nil {
+			return fmt.Errorf("failed to get IAM policy: %w", err)
+		}
+
+		if err := cleanupPolicy(cp, p.Bindings); err != nil {
+			return fmt.Errorf("failed to update IAM policy: %w", err)
+		}
+
+		// Set the new policy.
+		setIAMPolicyRequest := &iampb.SetIamPolicyRequest{
+			Resource: p.Resource,
+			Policy:   cp,
+		}
+		np, err = iamC.SetIamPolicy(ctx, setIAMPolicyRequest)
+		// Retry when set IAM policy fail.
+		// TODO(#8): Look for specific errors to retry.
+		if err != nil {
+			return retry.RetryableError(fmt.Errorf("failed to set IAM policy: %w, retrying", err))
+		}
+		return nil
+	}); err != nil {
+		return nil, fmt.Errorf("failed to handle IAM request: %w", err)
+	}
+
+	return &v1alpha1.IAMResponse{Resource: p.Resource, Policy: np}, nil
+}
+
 // Remove expired bindings and add or update new bindings with expiration condition.
 func updatePolicy(p *iampb.Policy, bs []*v1alpha1.Binding, expiry time.Time) error {
 	// Convert new bindings to a role to unique bindings map.
@@ -178,15 +251,15 @@ func updatePolicy(p *iampb.Policy, bs []*v1alpha1.Binding, expiry time.Time) err
 			continue
 		}
 
-		// Skip expired bindings.
-		expired, err := expired(cb.Condition.Expression)
-		if err != nil {
-			// Return error immediately since we don't expect this to fail.
-			return fmt.Errorf("failed to check expiry: %w", err)
-		}
-		if expired {
-			continue
-		}
+		// Skip expired bindings. (Handle it in cleanup)
+		// expired, err := expired(cb.Condition.Expression)
+		// if err != nil {
+		// 	// Return error immediately since we don't expect this to fail.
+		// 	return fmt.Errorf("failed to check expiry: %w", err)
+		// }
+		// if expired {
+		// 	continue
+		// }
 
 		// Skip roles we are not interested in.
 		if _, ok := bsMap[cb.Role]; !ok {
@@ -222,6 +295,36 @@ func updatePolicy(p *iampb.Policy, bs []*v1alpha1.Binding, expiry time.Time) err
 		sort.Strings(newBinding.Members)
 		p.Bindings = append(p.Bindings, newBinding)
 	}
+
+	// Set policy version to 3 to support conditional IAM bindings.
+	// See details here: https://cloud.google.com/iam/docs/policies#specifying-version-set
+	p.Version = 3
+	return nil
+}
+
+// Remove expired bindings and add or update new bindings with expiration condition.
+func cleanupPolicy(p *iampb.Policy, bs []*v1alpha1.Binding) error {
+	// Clean up current policy bindings.
+	var result []*iampb.Binding
+	for _, cb := range p.Bindings {
+		// Skip non-AOD bindings.
+		if cb.Condition == nil || cb.Condition.Title != ConditionTitle {
+			result = append(result, cb)
+			continue
+		}
+
+		// Skip expired bindings.
+		expired, err := expired(cb.Condition.Expression)
+		if err != nil {
+			// Return error immediately since we don't expect this to fail.
+			return fmt.Errorf("failed to check expiry: %w", err)
+		}
+		if expired {
+			continue
+		}
+		result = append(result, cb)
+	}
+	p.Bindings = result
 
 	// Set policy version to 3 to support conditional IAM bindings.
 	// See details here: https://cloud.google.com/iam/docs/policies#specifying-version-set

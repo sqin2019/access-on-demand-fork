@@ -39,6 +39,9 @@ var rootCmd = func() cli.Command {
 						"validate": func() cli.Command {
 							return &IAMValidateCommand{}
 						},
+						"cleanup": func() cli.Command {
+							return &IAMCleanupCommand{}
+						},
 					},
 				}
 			},

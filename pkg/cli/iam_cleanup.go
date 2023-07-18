@@ -28,33 +28,27 @@ import (
 	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
 )
 
-var _ cli.Command = (*IAMHandleCommand)(nil)
+var _ cli.Command = (*IAMCleanupCommand)(nil)
 
-// iamHandler interface that handles the IAMRequestWrapper.
-type iamHandler interface {
-	Do(context.Context, *v1alpha1.IAMRequestWrapper) ([]*v1alpha1.IAMResponse, error)
-	Cleanup(context.Context, *v1alpha1.IAMRequestWrapper) ([]*v1alpha1.IAMResponse, error)
-}
-
-// IAMHandleCommand handles IAM requests.
-type IAMHandleCommand struct {
+// IAMCleanupCommand handles IAM requests.
+type IAMCleanupCommand struct {
 	cli.BaseCommand
 
 	flagPath string
 
 	flagDuration time.Duration
 
-	flagStartTime time.Time
+	// flagExpiry time.Time
 
 	// testHandler is used for testing only.
 	testHandler iamHandler
 }
 
-func (c *IAMHandleCommand) Desc() string {
+func (c *IAMCleanupCommand) Desc() string {
 	return `Handle the IAM request YAML file in the given path`
 }
 
-func (c *IAMHandleCommand) Help() string {
+func (c *IAMCleanupCommand) Help() string {
 	return `
 Usage: {{ COMMAND }} [options]
 
@@ -64,7 +58,7 @@ Handle the IAM request YAML file in the given path:
 `
 }
 
-func (c *IAMHandleCommand) Flags() *cli.FlagSet {
+func (c *IAMCleanupCommand) Flags() *cli.FlagSet {
 	set := cli.NewFlagSet()
 
 	// Command options
@@ -78,26 +72,16 @@ func (c *IAMHandleCommand) Flags() *cli.FlagSet {
 		Usage:   `The path of IAM request file, in YAML format.`,
 	})
 
-	f.DurationVar(&cli.DurationVar{
-		Name:    "duration",
-		Target:  &c.flagDuration,
-		Example: "2h",
-		Usage:   `The IAM permission lifecycle, as a duration.`,
-	})
-
-	f.TimeVar(time.RFC3339, &cli.TimeVar{
-		Name:    "start-time",
-		Target:  &c.flagStartTime,
-		Example: "2009-11-10T23:00:00Z",
-		Default: time.Now().UTC(),
-		Usage: `The start time of the IAM permission lifecycle in RFC3339 format. ` +
-			`Default is current UTC time.`,
-	})
-
+	// f.TimeVar(time.RFC3339, &cli.TimeVar{
+	// 	Name:    "expiry",
+	// 	Target:  &c.flagExpiry,
+	// 	Example: "2009-11-10T23:00:00Z",
+	// 	Usage: `The expiry time of the IAM permission lifecycle in RFC3339 format. `,
+	// })
 	return set
 }
 
-func (c *IAMHandleCommand) Run(ctx context.Context, args []string) error {
+func (c *IAMCleanupCommand) Run(ctx context.Context, args []string) error {
 	f := c.Flags()
 	if err := f.Parse(args); err != nil {
 		return fmt.Errorf("failed to parse flags: %w", err)
@@ -111,18 +95,14 @@ func (c *IAMHandleCommand) Run(ctx context.Context, args []string) error {
 		return fmt.Errorf("path is required")
 	}
 
-	if c.flagDuration <= 0 {
-		return fmt.Errorf("a positive duration is required")
-	}
-
-	if c.flagStartTime.Add(c.flagDuration).Before(time.Now()) {
-		return fmt.Errorf("expiry (start time + duration) already passed")
-	}
+	// if c.flagExpiry.Equal(time.Time{}) {
+	// 	return fmt.Errorf("expiry is required")
+	// }
 
 	return c.handleIAM(ctx)
 }
 
-func (c *IAMHandleCommand) handleIAM(ctx context.Context) error {
+func (c *IAMCleanupCommand) handleIAM(ctx context.Context) error {
 	// Read request from file path.
 	var req v1alpha1.IAMRequest
 	if err := requestutil.ReadRequestFromPath(c.flagPath, &req); err != nil {
@@ -176,10 +156,10 @@ func (c *IAMHandleCommand) handleIAM(ctx context.Context) error {
 		StartTime:  c.flagStartTime,
 	}
 	// TODO(#15): add a log level to output handler response.
-	if _, err := h.Do(ctx, reqWrapper); err != nil {
-		return fmt.Errorf("failed to handle IAM request: %w", err)
+	if _, err := h.Cleanup(ctx, reqWrapper); err != nil {
+		return fmt.Errorf("failed to clean up IAM request: %w", err)
 	}
-	c.Outf("Successfully handled IAM request")
+	c.Outf("Successfully Cleanuped IAM request")
 
 	return nil
 }

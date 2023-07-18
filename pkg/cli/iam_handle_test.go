@@ -244,3 +244,8 @@ func (h *fakeIAMHandler) Do(ctx context.Context, req *v1alpha1.IAMRequestWrapper
 	h.gotReq = req
 	return nil, h.injectErr
 }
+
+func (h *fakeIAMHandler) Cleanup(ctx context.Context, req *v1alpha1.IAMRequestWrapper) ([]*v1alpha1.IAMResponse, error) {
+	h.gotReq = req
+	return nil, h.injectErr
+}
