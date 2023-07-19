@@ -84,7 +84,8 @@ jobs:
           START_TIME: '${{ github.event.head_commit.timestamp }}'
         run: |
           for file in requests; do
-            mergeTime=$(git log -1 --format=%ci ${file})
+            current_time=$(date +%s)
+            mergeTime=$(git log -1 --format=%ct ${file})
             # duration=$(awk -F_ '{print $2}' <<< ${file})
             # expiry=$(date -u -d "${mergeTime} ${duration}" --rfc-3339=seconds)
             if [[ ${current_time} -gt ${mergeTime} ]]; then
