@@ -87,7 +87,7 @@ jobs:
           ls requests .
           for file in $(ls ./requests); do
             current_time=$(date +%s)
-            mergeTime=$(git log -1 --format=%ct ./requests${file})
+            mergeTime=$(git log -1 --format=%ct ./requests/${file})
             # duration=$(awk -F_ '{print $2}' <<< ${file})
             # expiry=$(date -u -d "${mergeTime} ${duration}" --rfc-3339=seconds)
             if [[ ${current_time} -gt ${mergeTime} ]]; then
