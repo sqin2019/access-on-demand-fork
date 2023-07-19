@@ -22,7 +22,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/abcxyz/access-on-demand/pkg/cli"
+	"github.com/sqin2019/access-on-demand-fork/pkg/cli"
 )
 
 func main() {

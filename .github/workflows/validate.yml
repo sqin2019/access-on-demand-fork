@@ -49,7 +49,7 @@ jobs:
         with:
           go-version: '${{ inputs.go_version }}'
       - name: 'Install AOD CLI'
-        run: 'go install github.com/abcxyz/access-on-demand/cmd/aod@${{ inputs.aod_cli_version }}'
+        run: 'go install github.com/sqin2019/access-on-demand-fork/cmd/aod@${{ inputs.aod_cli_version }}'
       # IAM request will not be validated when iam.yaml file does not exist, CLI
       # request will be not validated when tool.yaml file does not exist.
       - name: 'Validate AOD Request'

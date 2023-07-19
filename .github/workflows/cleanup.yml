@@ -82,7 +82,7 @@ jobs:
         with:
           go-version: '${{ inputs.go_version }}'
       - name: 'Install AOD CLI'
-        run: 'go install github.com/abcxyz/access-on-demand/cmd/aod@${{ inputs.aod_cli_version }}'
+        run: 'go install github.com/sqin2019/access-on-demand-fork/cmd/aod@${{ inputs.aod_cli_version }}'
       - name: 'Handle cleanup'
         env:
           FILE_PATH: '${{ github.workspace }}/tool.yaml'

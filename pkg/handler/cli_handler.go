@@ -22,7 +22,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/abcxyz/access-on-demand/apis/v1alpha1"
+	"github.com/sqin2019/access-on-demand-fork/apis/v1alpha1"
 )
 
 // CLIHandler runs cli commands in the CLIRequest.

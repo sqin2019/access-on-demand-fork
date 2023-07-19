@@ -19,11 +19,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/abcxyz/access-on-demand/apis/v1alpha1"
-	"github.com/abcxyz/access-on-demand/pkg/handler"
-	"github.com/abcxyz/access-on-demand/pkg/requestutil"
 	"github.com/abcxyz/pkg/cli"
 	"github.com/posener/complete/v2/predict"
+	"github.com/sqin2019/access-on-demand-fork/apis/v1alpha1"
+	"github.com/sqin2019/access-on-demand-fork/pkg/handler"
+	"github.com/sqin2019/access-on-demand-fork/pkg/requestutil"
 
 	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
 )

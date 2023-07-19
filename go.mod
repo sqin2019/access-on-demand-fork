@@ -1,4 +1,4 @@
-module github.com/abcxyz/access-on-demand
+module github.com/sqin2019/access-on-demand-fork
 
 go 1.20
 

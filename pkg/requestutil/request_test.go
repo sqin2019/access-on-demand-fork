@@ -19,9 +19,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/abcxyz/access-on-demand/apis/v1alpha1"
 	"github.com/abcxyz/pkg/testutil"
 	"github.com/google/go-cmp/cmp"
+	"github.com/sqin2019/access-on-demand-fork/apis/v1alpha1"
 )
 
 func TestIAMValidateCommand(t *testing.T) {
