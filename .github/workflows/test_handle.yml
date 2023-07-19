@@ -134,7 +134,7 @@ jobs:
           TOOL_FILE_PATH: '${{ github.workspace }}/tool.yaml'
         run: |
           touch ${{ env.TOOL_ERROR_FILENAME }}
-          aod tool do -path ${{ env.TOOL_FILE_PATH }} 2> ${{ env.IAM_ERROR_FILENAME }}
+          aod tool do -path ${{ env.TOOL_FILE_PATH }} 2> ${{ env.TOOL_ERROR_FILENAME }}
 
       - name: 'IAM Request Comment'
         if: '${{ always()}}'
