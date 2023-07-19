@@ -108,7 +108,7 @@ jobs:
         if: '${{ steps.cpr.outputs.pull-request-number }}'
         uses: 'hmarr/auto-approve-action@v3'
         with:
-          github-token: '${{ secrets.GITHUB_TOKEN }}'
+          github-token: '${{ secrets.LZ }}'
           review-message: 'Auto approved automated PR'
           pull-request-number: '${{ steps.cpr.outputs.pull-request-number }}'
       - name: 'Enable Pull Request Automerge'
