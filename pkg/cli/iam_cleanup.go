@@ -36,8 +36,6 @@ type IAMCleanupCommand struct {
 
 	flagPath string
 
-	flagDuration time.Duration
-
 	// flagExpiry time.Time
 
 	// testHandler is used for testing only.
