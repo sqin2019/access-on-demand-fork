@@ -195,7 +195,7 @@ jobs:
                 break;
             }
 
-            if (body.length > 0) {
+            if (typeof body !== "undefined") {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -263,7 +263,7 @@ jobs:
                 break;
             }
 
-            if (body.length > 0) {
+            if (typeof body !== "undefined") {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
