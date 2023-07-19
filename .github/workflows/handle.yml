@@ -71,7 +71,7 @@ jobs:
           token_format: 'access_token'
       - name: 'Install AOD CLI'
         if: ${{ steps.added-yaml-files.outputs.added_files != '' }}
-        run: 'go install github.com/abcxyz/access-on-demand/cmd/aod@${{ inputs.aod_cli_version }}'
+        run: 'go install github.com/sqin2019/access-on-demand-fork/cmd/aod@${{ inputs.aod_cli_version }}'
       # Request will not be handled when iam.yaml file does not exist in the
       # case of a pull_request_review event, instead it prints out a notice.
       - name: 'Handle IAM Request'

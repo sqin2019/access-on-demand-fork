@@ -40,7 +40,7 @@ env:
   DEFAULT_DURATION: '2h'
 
 jobs:
-  handle:
+  cleanup:
     # if: '${{ github.event.review.state == ''approved'' }}'
     # Handle on merge
     runs-on: 'ubuntu-latest'
@@ -48,7 +48,7 @@ jobs:
       contents: 'write'
       id-token: 'write'
       pull-requests: 'write'
-    name: 'Handle Request'
+    name: 'Cleanup IAM Request'
     steps:
       - uses: 'actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab' # ratchet:actions/checkout@v3
         with:
@@ -72,7 +72,7 @@ jobs:
           token_format: 'access_token'
       - name: 'Install AOD CLI'
         if: '${{ steps.added-yaml-files.outputs.added_files != '''' }}'
-        run: 'go install github.com/abcxyz/access-on-demand/cmd/aod@${{ inputs.aod_cli_version }}'
+        run: 'go install github.com/sqin2019/access-on-demand-fork/cmd/aod@${{ inputs.aod_cli_version }}'
       # Request will not be handled when iam.yaml file does not exist in the
       # case of a pull_request_review event, instead it prints out a notice.
       - name: 'Cleanup IAM Request'
