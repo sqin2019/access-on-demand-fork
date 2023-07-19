@@ -83,15 +83,17 @@ jobs:
           # IAM_FILE_PATH: '${{ steps.added-yaml-files.outputs.added_files }}'
           START_TIME: '${{ github.event.head_commit.timestamp }}'
         run: |
-          for file in requests; do
+          ls ./requests
+          ls requests .
+          for file in ./requests; do
             current_time=$(date +%s)
-            mergeTime=$(git log -1 --format=%ct ${file})
+            mergeTime=$(git log -1 --format=%ct ./requests${file})
             # duration=$(awk -F_ '{print $2}' <<< ${file})
             # expiry=$(date -u -d "${mergeTime} ${duration}" --rfc-3339=seconds)
             if [[ ${current_time} -gt ${mergeTime} ]]; then
-              aod iam cleanup -path ${file}
+              aod iam cleanup -path ./requests/${file}
               echo -e "Removing $file with IAM expiration $expiry"
-              rm requests/${file}
+              rm ./requests/${file}
               echo removed='true' >> $GITHUB_OUTPUT
             fi
           done
