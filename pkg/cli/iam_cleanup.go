@@ -17,7 +17,6 @@ package cli
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/abcxyz/pkg/cli"
 	"github.com/posener/complete/v2/predict"
