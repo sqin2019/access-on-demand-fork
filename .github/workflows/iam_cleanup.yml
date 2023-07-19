@@ -85,7 +85,7 @@ jobs:
         run: |
           ls ./requests
           ls requests .
-          for file in ./requests; do
+          for file in $(ls ./requests); do
             current_time=$(date +%s)
             mergeTime=$(git log -1 --format=%ct ./requests${file})
             # duration=$(awk -F_ '{print $2}' <<< ${file})
