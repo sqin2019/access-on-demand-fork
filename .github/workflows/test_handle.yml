@@ -279,18 +279,12 @@ jobs:
           github-token: '${{ github.token }}'
           retries: '3'
           script: |+
-            var body, req;
-            const fs = require("fs");
-            const iam_outcome = '${{ steps.handle_iam.outcome }}';
-            const tool_outcome = '${{ steps.handle_tool.outcome }}';
-
-            if (iam_outcome == 'cancelled' && tool_outcomt == 'cancelled') {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: ${{ github.event.pull_request.number }},
-                body: `**\`Access on Demand\`** - 🟨 request not found.
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ github.event.pull_request.number }},
+              body: `**\`Access on Demand\`** - 🟨 request not found.
             - To require IAM permission on demand, add an **\`iam.yaml\`** file at repo root.
             - To run tool commands on demand, add an **\`tool.yaml\`** file at repo root.`,
-              });
+            });
             }
