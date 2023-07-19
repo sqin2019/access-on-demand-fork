@@ -287,4 +287,3 @@ jobs:
             - To require IAM permission on demand, add an **\`iam.yaml\`** file at repo root.
             - To run tool commands on demand, add an **\`tool.yaml\`** file at repo root.`,
             });
-            }
