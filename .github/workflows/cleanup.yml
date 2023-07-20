@@ -32,6 +32,8 @@ on:
         type: 'string'
         default: '1.20'
         required: false
+env:
+  TOOL_ERROR_FILENAME: '/tmp/tool_error.txt'
 
 jobs:
   # Check the current status of this pull request with respect to code review.
@@ -86,7 +88,6 @@ jobs:
         id: 'cleanup_tool'
         env:
           FILE_PATH: '${{ github.workspace }}/tool.yaml'
-          TOOL_ERROR_FILENAME: '/tmp/tool_error.txt'
         run: |
           touch ${{ env.TOOL_ERROR_FILENAME }}
           aod tool cleanup -path ${{ env.FILE_PATH }} 2> ${{ env.TOOL_ERROR_FILENAME }}
