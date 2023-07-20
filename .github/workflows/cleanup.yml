@@ -37,21 +37,19 @@ jobs:
   # Check the current status of this pull request with respect to code review.
   review_status:
     runs-on: 'ubuntu-latest'
+    permissions:
+      pull-requests: 'read'
     outputs:
       REVIEW_DECISION: '${{ steps.get_review_decision.outputs.REVIEW_DECISION }}'
     steps:
-      - id: 'repo_name'
-        env:
-          REPO: '${{ github.repository }}'
-        run: 'echo "REPO_NAME=${REPO##*/}" >> $GITHUB_OUTPUT'
       - id: 'get_review_decision'
         env:
-          OWNER: '${{ github.repository_owner }}'
-          REPO_NAME: '${{ steps.repo_name.outputs.REPO_NAME }}'
-          PR_NUMBER: '${{ github.event.number }}'
+          # Set the GH_TOKEN environment variable to use GitHub CLI in a GitHub Actions workflow.
+          # See ref: https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows
           GH_TOKEN: '${{ github.token }}'
         run: |
-          reviewDecision="$(gh api graphql -F owner=$OWNER -F name=$REPO_NAME -F pr_number=$PR_NUMBER -f query='
+          repo=${{ github.repository }}
+          reviewDecision="$(gh api graphql -F owner=${{ github.repository_owner }} -F name=${repo##*/} -F pr_number=${{ github.event.pull_request.number }} -f query='
             query($name: String!, $owner: String!, $pr_number: Int!) {
               repository(owner: $owner, name: $name) {
                 pullRequest(number: $pr_number) {
@@ -63,7 +61,7 @@ jobs:
 
           echo REVIEW_DECISION=$reviewDecision >> $GITHUB_OUTPUT
 
-  # Only run CLI request cleanup when the pull request is approved.
+  # Only run Tool request cleanup when the pull request is approved.
   cleanup:
     needs: 'review_status'
     if: '${{ needs.review_status.outputs.REVIEW_DECISION == ''APPROVED'' }}'
@@ -71,7 +69,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-    name: 'Handle CLI Request Cleanup'
+    name: 'Handle Tool Request Cleanup'
     steps:
       - name: 'Checkout Triggering Branch'
         uses: 'actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab' # ratchet:actions/checkout@v3
@@ -82,8 +80,79 @@ jobs:
         with:
           go-version: '${{ inputs.go_version }}'
       - name: 'Install AOD CLI'
-        run: 'go install github.com/sqin2019/access-on-demand-fork/cmd/aod@${{ inputs.aod_cli_version }}'
+        run: 'go install github.com/abcxyz/access-on-demand/cmd/aod@${{ inputs.aod_cli_version }}'
       - name: 'Handle cleanup'
+        id: 'cleanup_tool'
         env:
           FILE_PATH: '${{ github.workspace }}/tool.yaml'
-        run: 'aod tool cleanup -path $FILE_PATH'
+          TOOL_ERROR_FILENAME: '/tmp/tool_error.txt'
+        run: |
+          touch ${{ env.TOOL_ERROR_FILENAME }}
+          aod tool cleanup -path ${{ env.FILE_PATH }} 2> ${{ env.TOOL_ERROR_FILENAME }}
+      - name: 'Tool Request Cleanup Comment'
+        if: '${{ always() }}'
+        uses: 'actions/github-script@98814c53be79b1d30f795b907e553d8679345975' # ratchet:actions/github-script@v6
+        with:
+          github-token: '${{ github.token }}'
+          retries: '3'
+          script: |+
+            var body, req;
+            const fs = require("fs");
+            const outcome = '${{ steps.cleanup_tool.outcome }}';
+            switch (outcome) {
+              case 'success':
+                req = fs.readFileSync(
+                  `tool.yaml`,
+                  { encoding: "utf8" }
+                );
+
+              body = `**\`Access on Demand\`** - 🟩 **\`Tool\`** request succeeded.
+
+            <details>
+            <summary>Details</summary>
+            Executed "cleanup" commands in the request below.
+
+            \`\`\`
+            ${req}
+            \`\`\`
+            </details>`;
+                break;
+              case 'failure':
+                req = fs.readFileSync(
+                  `tool.yaml`,
+                  { encoding: "utf8" }
+                );
+                const error = fs.readFileSync(
+                  `${{ env.TOOL_ERROR_FILENAME }}`,
+                  { encoding: "utf8" }
+                );
+                body = `**\`Access on Demand\`** - 🟥 **\`Tool\`** request failed.
+
+            <details>
+            <summary>Details</summary>
+            Failed to execute "cleanup" commands in the request below.
+
+            \`\`\`
+            ${req}
+            \`\`\`
+
+            Error:
+            \`\`\`
+            ${error}
+            \`\`\`
+            </details>`;
+                break;
+              // step cancelled/skipped, should not happen if the triggering event is correct.
+              default:
+                // Do nothing.
+                break;
+            }
+
+            if (typeof body !== "undefined") {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: ${{ github.event.pull_request.number }},
+                body: body,
+              });
+            }
