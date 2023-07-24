@@ -70,6 +70,7 @@ jobs:
           workload_identity_provider: '${{ inputs.workload_identity_provider }}'
           service_account: '${{ inputs.service_account }}'
           token_format: 'access_token'
+          create_credentials_file: 'false'
       - name: 'Install AOD CLI'
 #         if: '${{ steps.added-yaml-files.outputs.added_files != '''' }}'
         run: 'go install github.com/sqin2019/access-on-demand-fork/cmd/aod@${{ inputs.aod_cli_version }}'
