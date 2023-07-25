@@ -23,6 +23,10 @@ on:
         type: 'number'
         default: 24
         required: false
+      aod_instruction_link:
+        description: 'The number of hours to keep an AOD PR open since last updated.'
+        type: 'string'
+        required: true
 
 
 env:
@@ -31,7 +35,7 @@ env:
     The request will be automatically applied once the code owners approve it.
     Please close the PR once you are finished or it will automatically be closed
     after ~${{ inputs.expiry_hours }} hours. For more instructions, please see
-    [here](https://github.com/abcxyz/aod-template/blob/main/README.md).
+    [here](${{ inputs.aod_instruction_link }}).
 
 jobs:
   note:
