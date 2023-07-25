@@ -64,13 +64,13 @@ jobs:
         with:
           go-version: '${{ inputs.go_version }}'
       - name: 'Authenticate to Google Cloud'
+        id: 'auth'
 #         if: '${{ steps.added-yaml-files.outputs.added_files != '''' }}'
         uses: 'google-github-actions/auth@35b0e87d162680511bf346c299f71c9c5c379033' # ratchet:google-github-actions/auth@v1
         with:
           workload_identity_provider: '${{ inputs.workload_identity_provider }}'
           service_account: '${{ inputs.service_account }}'
           token_format: 'access_token'
-          create_credentials_file: 'false'
       - name: 'Install AOD CLI'
 #         if: '${{ steps.added-yaml-files.outputs.added_files != '''' }}'
         run: 'go install github.com/sqin2019/access-on-demand-fork/cmd/aod@${{ inputs.aod_cli_version }}'
@@ -89,15 +89,28 @@ jobs:
           for file in $(ls ./requests); do
             current_time=$(date +%s)
             mergeTime=$(git log -1 --format=%ct ./requests/${file})
-            # duration=$(awk -F_ '{print $2}' <<< ${file})
-            # expiry=$(date -u -d "${mergeTime} ${duration}" --rfc-3339=seconds)
-            if [[ ${current_time} -gt ${mergeTime} ]]; then
+            duration=$(awk -F_ '{print $2}' <<< ./requests/${file})
+            hours=$(awk -Fh '{print $1}' <<< $duration)
+            if [ -z $hours ]; then
+              hours=0
+            fi
+            minutes=$(awk -Fm '{print $1}' <<< $(awk -Fh '{print $2}' <<< $duration))
+            if [ -z $minutes ]; then
+              minutes=0
+            fi
+            echo $duration
+            echo $hours
+            echo $minutes
+            expiry=$(($mergeTime + ($hour * 3600) + ($minutes * 60)))
+            echo $expiry
+            if [[ ${current_time} -gt ${expiry} ]]; then
               aod iam cleanup -path ./requests/${file}
               echo -e "Removing $file with IAM expiration $expiry"
               rm ./requests/${file}
               echo removed='true' >> $GITHUB_OUTPUT
             fi
           done
+          rm ${{ steps.auth.outputs.credentials_file_path }}
       - name: Commit & Push changes
         if: '${{ steps.remove_expired.outputs.removed }}'
         uses: actions-js/push@master
