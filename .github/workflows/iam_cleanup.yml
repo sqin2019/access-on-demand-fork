@@ -101,7 +101,7 @@ jobs:
             echo $duration
             echo $hours
             echo $minutes
-            expiry=$(($mergeTime + ($hour * 3600) + ($minutes * 60)))
+            expiry=$(($mergeTime + ($hours * 3600) + ($minutes * 60)))
             echo $expiry
             if [[ ${current_time} -gt ${expiry} ]]; then
               aod iam cleanup -path ./requests/${file}
