@@ -101,7 +101,7 @@ jobs:
           FILE_PATH: '${{ github.workspace }}/tool.yaml'
         run: |
           touch ${{ env.TOOL_ERROR_FILENAME }}
-          aod tool cleanup -path ${{ env.FILE_PATH }} 2> ${{ env.TOOL_ERROR_FILENAME }}
+          aod tool cleanup -path ${{ env.FILE_PATH }} -debug 2> ${{ env.TOOL_ERROR_FILENAME }}
       # TODO (#79): Output only executed commands.
       - name: 'Tool Request Cleanup Comment'
         if: '${{ always() }}'
