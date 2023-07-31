@@ -94,6 +94,13 @@ jobs:
                   issue_number: pull['number'],
                   body: `**\`Access on Demand\`** - request closed due to inactivity for at least ${{ inputs.expiry_hours }} hours`,
                 });
+
+                // Delete branch.
+                await github.rest.git.deleteRef({
+                  owner: repoOwner,
+                  repo: repoName,
+                  ref: pull['head']['ref'],
+                });
               } else {
                 core.info(`Skipping #${pull['number']} (${pull['title']}) - not an AOD request`);
               }
