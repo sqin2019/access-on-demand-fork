@@ -102,7 +102,7 @@ jobs:
                 await github.rest.git.deleteRef({
                   owner: repoOwner,
                   repo: repoName,
-                  ref: pull['head']['ref'],
+                  ref: heads/${pull['head']['ref']},
                 });
               } else {
                 core.info(`Skipping #${pull['number']} (${pull['title']}) - not an AOD request`);
