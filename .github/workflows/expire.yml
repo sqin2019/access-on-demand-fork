@@ -95,8 +95,9 @@ jobs:
                   owner: repoOwner,
                   repo: repoName,
                   issue_number: pull['number'],
-                  body: `**\`Access on Demand\`** - request closed due to inactivity for at least ${{ inputs.expiry_hours }} hours`,
+                  body: `**\`Access on Demand\`** - request closed and branch deleted due to inactivity for at least ${{ inputs.expiry_hours }} hours`,
                 });
+                core.info(`Deleting branch ${pull['head']['ref']}`);
 
                 // Delete branch.
                 await github.rest.git.deleteRef({
