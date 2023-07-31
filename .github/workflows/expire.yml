@@ -30,6 +30,8 @@ on:
 
 permissions:
   pull-requests: 'write'
+  # Required for closing a PR, see ref: https://docs.github.com/en/rest/overview/permissions-required-for-github-apps?apiVersion=2022-11-28#repository-permissions-for-codespaces
+  contents: 'write'
 
 jobs:
   expire:
