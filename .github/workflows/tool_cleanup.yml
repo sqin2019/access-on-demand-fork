@@ -39,39 +39,40 @@ on:
 
 env:
   TOOL_ERROR_FILENAME: '/tmp/tool_error.txt'
+  TOOL_OUT_FILENAME: '/tmp/tool_output.txt'
 
 jobs:
   # Check the current status of this pull request with respect to code review.
-  review_status:
-    runs-on: 'ubuntu-latest'
-    permissions:
-      pull-requests: 'read'
-    outputs:
-      REVIEW_DECISION: '${{ steps.get_review_decision.outputs.REVIEW_DECISION }}'
-    steps:
-      - id: 'get_review_decision'
-        env:
-          # Set the GH_TOKEN environment variable to use GitHub CLI in a GitHub Actions workflow.
-          # See ref: https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows
-          GH_TOKEN: '${{ github.token }}'
-        run: |
-          repo=${{ github.repository }}
-          reviewDecision="$(gh api graphql -F owner=${{ github.repository_owner }} -F name=${repo##*/} -F pr_number=${{ github.event.pull_request.number }} -f query='
-            query($name: String!, $owner: String!, $pr_number: Int!) {
-              repository(owner: $owner, name: $name) {
-                pullRequest(number: $pr_number) {
-                  reviewDecision
-                }
-              }
-            }
-          ' --jq '.data.repository.pullRequest.reviewDecision')"
+  # review_status:
+  #   runs-on: 'ubuntu-latest'
+  #   permissions:
+  #     pull-requests: 'read'
+  #   outputs:
+  #     REVIEW_DECISION: '${{ steps.get_review_decision.outputs.REVIEW_DECISION }}'
+  #   steps:
+  #     - id: 'get_review_decision'
+  #       env:
+  #         # Set the GH_TOKEN environment variable to use GitHub CLI in a GitHub Actions workflow.
+  #         # See ref: https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows
+  #         GH_TOKEN: '${{ github.token }}'
+  #       run: |
+  #         repo=${{ github.repository }}
+  #         reviewDecision="$(gh api graphql -F owner=${{ github.repository_owner }} -F name=${repo##*/} -F pr_number=${{ github.event.pull_request.number }} -f query='
+  #           query($name: String!, $owner: String!, $pr_number: Int!) {
+  #             repository(owner: $owner, name: $name) {
+  #               pullRequest(number: $pr_number) {
+  #                 reviewDecision
+  #               }
+  #             }
+  #           }
+  #         ' --jq '.data.repository.pullRequest.reviewDecision')"
 
-          echo REVIEW_DECISION=$reviewDecision >> $GITHUB_OUTPUT
+  #         echo REVIEW_DECISION=$reviewDecision >> $GITHUB_OUTPUT
 
   # Only run Tool request cleanup when the pull request is approved.
   cleanup:
-    needs: 'review_status'
-    if: '${{ needs.review_status.outputs.REVIEW_DECISION == ''APPROVED'' }}'
+    # needs: 'review_status'
+    # if: '${{ needs.review_status.outputs.REVIEW_DECISION == ''APPROVED'' }}'
     runs-on: 'ubuntu-latest'
     permissions:
       contents: 'read'
@@ -93,6 +94,9 @@ jobs:
           workload_identity_provider: '${{ inputs.workload_identity_provider }}'
           service_account: '${{ inputs.service_account }}'
           token_format: 'access_token'
+      # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1'
       - name: 'Install AOD CLI'
         run: 'go install github.com/abcxyz/access-on-demand/cmd/aod@${{ inputs.aod_cli_version }}'
       - name: 'Handle cleanup'
@@ -100,8 +104,10 @@ jobs:
         env:
           FILE_PATH: '${{ github.workspace }}/tool.yaml'
         run: |
-          touch ${{ env.TOOL_ERROR_FILENAME }}
-          aod tool cleanup -path ${{ env.FILE_PATH }} -debug 2> ${{ env.TOOL_ERROR_FILENAME }}
+          touch ${{ env.TOOL_ERROR_FILENAME }} ${{ env.TOOL_OUT_FILENAME }}
+          aod tool cleanup -path ${{ env.FILE_PATH }} -verbose \
+          2> ${{ env.TOOL_ERROR_FILENAME }} \
+          > ${{ env.TOOL_OUT_FILENAME }}
       # TODO (#79): Output only executed commands.
       - name: 'Tool Request Cleanup Comment'
         if: '${{ always() }}'
@@ -116,7 +122,7 @@ jobs:
             switch (outcome) {
               case 'success':
                 req = fs.readFileSync(
-                  `tool.yaml`,
+                  `${{ env.TOOL_OUT_FILENAME }}`,
                   { encoding: "utf8" }
                 );
 
@@ -133,7 +139,7 @@ jobs:
                 break;
               case 'failure':
                 req = fs.readFileSync(
-                  `tool.yaml`,
+                  `${{ env.TOOL_OUT_FILENAME }}`,
                   { encoding: "utf8" }
                 );
                 const error = fs.readFileSync(
