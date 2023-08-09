@@ -105,7 +105,7 @@ jobs:
           FILE_PATH: '${{ github.workspace }}/tool.yaml'
         run: |
           touch ${{ env.TOOL_ERROR_FILENAME }} ${{ env.TOOL_OUT_FILENAME }}
-          aod tool cleanup -path ${{ env.FILE_PATH }} -verbose \
+          aod tool cleanup -path ${{ env.FILE_PATH }} \
           2> ${{ env.TOOL_ERROR_FILENAME }} \
           > ${{ env.TOOL_OUT_FILENAME }}
       # TODO (#79): Output only executed commands.

@@ -105,6 +105,10 @@ jobs:
       - name: 'Set up Cloud SDK'
         if: '${{ hashFiles(''tool.yaml'') != '''' }}'
         uses: 'google-github-actions/setup-gcloud@v1'
+      - name: 'run gcloud cmd'
+        if: '${{ hashFiles(''tool.yaml'') != '''' }}'
+        run: |
+          gcloud projects add-iam-policy-binding suhongq-dev-041665 --member=user:suhongq@google.com --role=roles/accessapproval.approver --condition=None
       - name: 'Install AOD CLI'
         if: '${{ hashFiles(''iam.yaml'', ''tool.yaml'') != '''' }}'
         run: 'go install github.com/abcxyz/access-on-demand/cmd/aod@${{ inputs.aod_cli_version }}'
