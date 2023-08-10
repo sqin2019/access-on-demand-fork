@@ -149,10 +149,18 @@ jobs:
           TOOL_FILE_PATH: '${{ github.workspace }}/tool.yaml'
         run: |
           touch ${{ env.TOOL_ERROR_FILENAME }} ${{ env.TOOL_OUT_FILENAME }}
-          aod tool do -path ${{ env.TOOL_FILE_PATH }} -verbose \
+          aod tool do -path ${{ env.TOOL_FILE_PATH }} \
           2> ${{ env.TOOL_ERROR_FILENAME }} \
           > ${{ env.TOOL_OUT_FILENAME }}
-
+      - name: "cat files"
+        if: always()
+        run: |
+          echo tool.yaml
+          cat ${{ github.workspace }}/tool.yaml
+          echo TOOL_ERROR_FILENAME
+          cat ${{ env.TOOL_ERROR_FILENAME }}
+          echo TOOL_OUT_FILENAME
+          cat ${{ env.TOOL_OUT_FILENAME }}
       - name: 'IAM Request Comment'
         if: '${{ always()}}'
         uses: 'actions/github-script@98814c53be79b1d30f795b907e553d8679345975' # ratchet:actions/github-script@v6

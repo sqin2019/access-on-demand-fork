@@ -105,9 +105,19 @@ jobs:
           FILE_PATH: '${{ github.workspace }}/tool.yaml'
         run: |
           touch ${{ env.TOOL_ERROR_FILENAME }} ${{ env.TOOL_OUT_FILENAME }}
-          aod tool cleanup -path ${{ env.FILE_PATH }} \
+          aod tool cleanup -path ${{ env.FILE_PATH }} -verbose \
           2> ${{ env.TOOL_ERROR_FILENAME }} \
           > ${{ env.TOOL_OUT_FILENAME }}
+
+      - name: "cat files"
+        if: always()
+        run: |
+          echo tool.yaml
+          cat ${{ github.workspace }}/tool.yaml
+          echo TOOL_ERROR_FILENAME
+          cat ${{ env.TOOL_ERROR_FILENAME }}
+          echo TOOL_OUT_FILENAME
+          cat ${{ env.TOOL_OUT_FILENAME }}
       # TODO (#79): Output only executed commands.
       - name: 'Tool Request Cleanup Comment'
         if: '${{ always() }}'
