@@ -74,9 +74,19 @@ jobs:
               // Check if the PR is an AOD request by checking the AOD file existence.
               if (files.data.find(f => (f.filename === 'iam.yaml' || f.filename === 'tool.yaml'))) {
                 // Check if the PR is within the cutoff threshold
-                const updatedAt = new Date(Date.parse(pull['updated_at']));
+                // const updatedAt = new Date(Date.parse(pull['updated_at']));
 
-                if (now.getTime() - updatedAt.getTime() < cutoffMs) {
+                // const ref = pull['head']['ref']
+                const branch = await github.rest.repos.getBranch({
+                  owner: repoOwner,
+                  repo: repoName,
+                  branch: pull['head']['ref'],
+                })
+                core.info(`branch (${branch})`);
+                const lastCommittedAt = branch['properties']['commit']['properties']['commit']['properties']['committer']['properties']['date']
+                core.info(`lastCommittedAt (${lastCommittedAt})`);
+
+                if (now.getTime() - new Date(Date.parse(lastCommittedAt)).getTime() < cutoffMs) {
                   core.info(`Skipping #${pull['number']} (${pull['title']}) - within threshold`);
                   return;
                 }
