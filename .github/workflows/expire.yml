@@ -77,14 +77,19 @@ jobs:
                 // const updatedAt = new Date(Date.parse(pull['updated_at']));
 
                 // const ref = pull['head']['ref']
+                core.infor(`sqin ref ${pull['head']['ref']}`)
                 const branch = await github.rest.repos.getBranch({
                   owner: repoOwner,
                   repo: repoName,
                   branch: pull['head']['ref'],
                 })
-                core.info(`branch (${branch['commit']['commit']})`);
+                core.info(`sqin branch name (${branch['name']})`);
+                console.log(sqin console branch ${branch})
+                core.info(`sqin branch sha (${branch['commit']['sha']})`);
+                core.info(`sqin branch commit (${branch['commit']['commit']})`);
+                core.info(`sqin branch commit url (${branch['commit']['commit']['url']})`);
                 const lastCommittedAt = branch['commit']['commit']['committer']['date']
-                core.info(`lastCommittedAt (${lastCommittedAt})`);
+                core.info(`sqin lastCommittedAt (${lastCommittedAt})`);
 
                 if (now.getTime() - new Date(Date.parse(lastCommittedAt)).getTime() < cutoffMs) {
                   core.info(`Skipping #${pull['number']} (${pull['title']}) - within threshold`);
