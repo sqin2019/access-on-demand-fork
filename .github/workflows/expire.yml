@@ -82,8 +82,8 @@ jobs:
                   repo: repoName,
                   branch: pull['head']['ref'],
                 })
-                core.info(`branch (${branch})`);
-                const lastCommittedAt = branch['properties']['commit']['properties']['commit']['properties']['committer']['properties']['date']
+                core.info(`branch (${branch['properties']})`);
+                const lastCommittedAt = branch['properties']['commit']['properties']['committer']['properties']['date']
                 core.info(`lastCommittedAt (${lastCommittedAt})`);
 
                 if (now.getTime() - new Date(Date.parse(lastCommittedAt)).getTime() < cutoffMs) {
