@@ -34,6 +34,41 @@ permissions:
   contents: 'write'
 
 jobs:
+  # last_commit_time:
+  #   runs-on: 'ubuntu-latest'
+  #   permissions:
+  #     pull-requests: 'read'
+  #   outputs:
+  #     LAST_COMMIT_TIME: '${{ steps.get_last_commit_time.outputs.LAST_COMMIT_TIME }}'
+  #   steps:
+  #     - id: 'get_last_commit_time'
+  #       env:
+  #         # Set the GH_TOKEN environment variable to use GitHub CLI in a GitHub Actions workflow.
+  #         # See ref: https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows
+  #         GH_TOKEN: '${{ github.token }}'
+  #       run: |
+  #         commitTime="$(gh api graphql
+  #         -F owner=${${{ inputs.repo }}%/*}
+  #         -F name=${${{ inputs.repo }}##*/}
+  #         -F pr_number=${{ github.event.pull_request.number }}
+  #         -F num_commit=1
+  #         -f query='
+  #           query($name: String!, $owner: String!, $pr_number: Int!) {
+  #             repository(owner: $owner, name: $name) {
+  #               pullRequest(number: $pr_number) {
+  #                 commits(last: $num_commit) {
+  #                   nodes {
+  #                     commit {
+  #                       authoredDate
+  #                     }
+  #                   }
+  #                 }
+  #               }
+  #             }
+  #           }
+  #         ' --jq '.data.repository.pullRequest.commits.nodes.commit.autheredData')"
+
+  #         echo LAST_COMMIT_TIME=$commitTime >> $GITHUB_OUTPUT
   expire:
     runs-on: 'ubuntu-latest'
     steps:
@@ -74,20 +109,15 @@ jobs:
               // Check if the PR is an AOD request by checking the AOD file existence.
               if (files.data.find(f => (f.filename === 'iam.yaml' || f.filename === 'tool.yaml'))) {
                 // Check if the PR is within the cutoff threshold
-                // const updatedAt = new Date(Date.parse(pull['updated_at']));
-
-                // const ref = pull['head']['ref']
-                core.info(`sqin ref (${pull['head']['ref']})`)
+                // Get last committed at time from ref branch
+                const ref = pull['head']['ref']
                 const branch = await github.rest.repos.getBranch({
                   owner: repoOwner,
                   repo: repoName,
-                  branch: pull['head']['ref'],
+                  branch: ref,
                 })
-                core.info(`sqin branch commit (${branch['data']})`);
-                console.log(branch['data'])
-                console.log(branch['data']['commit'])
                 const lastCommittedAt = branch['data']['commit']['commit']['committer']['date']
-                core.info(`sqin lastCommittedAt (${lastCommittedAt})`);
+                core.info(`#${pull['number']} lastCommittedAt (${lastCommittedAt})`);
 
                 if (now.getTime() - new Date(Date.parse(lastCommittedAt)).getTime() < cutoffMs) {
                   core.info(`Skipping #${pull['number']} (${pull['title']}) - within threshold`);
@@ -110,13 +140,14 @@ jobs:
                   issue_number: pull['number'],
                   body: `**\`Access on Demand\`** - request closed and branch deleted due to inactivity for at least ${{ inputs.expiry_hours }} hours`,
                 });
-                core.info(`Deleting branch ${pull['head']['ref']}`);
+
+                core.info(`Deleting branch ${ref}`);
 
                 // Delete branch.
                 await github.rest.git.deleteRef({
                   owner: repoOwner,
                   repo: repoName,
-                  ref: `heads/${pull['head']['ref']}`,
+                  ref: `heads/${ref}`,
                 });
               } else {
                 core.info(`Skipping #${pull['number']} (${pull['title']}) - not an AOD request`);
