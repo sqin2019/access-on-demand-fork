@@ -255,7 +255,7 @@ jobs:
               });
             }
       - name: 'IAM Request Not Found Comment'
-        if: '${{ always() && hashFiles(''iam.yaml'') != '''' }}'
+        if: '${{ always() && hashFiles(''iam.yaml'') == '''' }}'
         uses: 'actions/github-script@98814c53be79b1d30f795b907e553d8679345975' # ratchet:actions/github-script@v6
         with:
           github-token: '${{ github.token }}'
@@ -268,7 +268,7 @@ jobs:
               body: `**\`Access on Demand\`** - 🟦 **\`IAM\`** request not found, skip cleanup.`,
             });
       - name: 'Tool Request Not Found Comment'
-        if: '${{ always() && hashFiles(''tool.yaml'') != '''' }}'
+        if: '${{ always() && hashFiles(''tool.yaml'') == '''' }}'
         uses: 'actions/github-script@98814c53be79b1d30f795b907e553d8679345975' # ratchet:actions/github-script@v6
         with:
           github-token: '${{ github.token }}'
