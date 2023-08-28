@@ -132,6 +132,7 @@ jobs:
             var body, req;
             const fs = require("fs");
             const outcome = '${{ steps.cleanup_tool.outcome }}';
+            core.info(`outcome: ${outcome}`)
             switch (outcome) {
               case 'success':
                 req = fs.readFileSync(
