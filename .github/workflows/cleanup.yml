@@ -137,9 +137,11 @@ jobs:
             const req = fs.readFileSync(toolOutFilename, { encoding: "utf8" });
 
             const body = `**\`Access on Demand\`** - 🟩 **\`Tool\`** request cleanup succeeded.
+
             <details>
             <summary>Details</summary>
             Executed "cleanup" commands in the request below, or skipped if commands not found.
+
             \`\`\`
             ${req}
             \`\`\`
@@ -167,12 +169,15 @@ jobs:
             const error = fs.readFileSync(toolErrFilename, { encoding: "utf8" });
 
             const body = `**\`Access on Demand\`** - 🟥 **\`Tool\`** request cleanup failed.
+
             <details>
             <summary>Details</summary>
             Failed to execute "cleanup" commands in the request below.
+
             \`\`\`
             ${req}
             \`\`\`
+
             Error:
             \`\`\`
             ${error}
@@ -211,9 +216,11 @@ jobs:
             const req = fs.readFileSync(iamOutFilename, { encoding: "utf8" });
 
             const body = `**\`Access on Demand\`** - 🟩 **\`IAM\`** request cleanup succeeded.
+
             <details>
             <summary>Details</summary>
             Removed bindings in the request below.
+
             \`\`\`
             ${req}
             \`\`\`
@@ -241,12 +248,15 @@ jobs:
             const error = fs.readFileSync(iamErrFilename, { encoding: "utf8" });
 
             const body = `**\`Access on Demand\`** - 🟥 **\`IAM\`** request cleanup failed.
+
             <details>
             <summary>Details</summary>
             Failed to cleanup IAM polices of the resources in the request below.
+
             \`\`\`
             ${req}
             \`\`\`
+
             Error:
             \`\`\`
             ${error}
