@@ -103,13 +103,13 @@ jobs:
                 core.info(`Deleting branch ${pull['head']['ref']}`);
 
                 // Delete branch.
-                setTimeout(function() {
-                  await github.rest.git.deleteRef({
-                    owner: repoOwner,
-                    repo: repoName,
-                    ref: `heads/${pull['head']['ref']}`,
-                  });
-                }, 3600)
+                // setTimeout(function() {
+                //  await github.rest.git.deleteRef({
+                //    owner: repoOwner,
+                //    repo: repoName,
+                //    ref: `heads/${pull['head']['ref']}`,
+                //  });
+                //}, 3600)
 
               } else {
                 core.info(`Skipping #${pull['number']} (${pull['title']}) - not an AOD request`);
