@@ -30,7 +30,7 @@ on:
     outputs:
       pulls:
         description: "Information of the pull requests that are expired."
-        value: '${{ jobs.cleanup.outputs.pulls }}'
+        value: '${{ jobs.expire.outputs.pulls }}'
 
 permissions:
   pull-requests: 'write'
