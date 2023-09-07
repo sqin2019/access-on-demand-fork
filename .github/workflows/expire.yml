@@ -27,22 +27,50 @@ on:
         type: 'number'
         default: 24
         required: false
+      # workload_identity_provider:
+      #   description: 'The full identifier of the Workload Identity Provider, including the project number, pool name, and provider name.'
+      #   type: 'string'
+      #   required: true
+      # service_account:
+      #   description: 'Email address or unique identifier of the Google Cloud service account for which to generate credentials.'
+      #   type: 'string'
+      #   required: true
+      # aod_cli_version:
+      #   description: 'The version of AOD CLI.'
+      #   type: 'string'
+      #   default: 'latest'
+      #   required: false
+      # go_version:
+      #   description: 'The version of Golang.'
+      #   type: 'string'
+      #   default: '1.21'
+      #   required: false
+      # pr_number:
+      #   description: "The number of the pull request that contains the AOD requests."
+      #   type: 'number'
+      #   default: ${{ github.event.pull_request.number }}
+      #   required: false
+      # branch:
+      #   description: "The branch of the pull request."
+      #   type: 'string'
+      #   default: ${{ github.event.pull_request.head.ref }}
+      #   required: false
 
 permissions:
   pull-requests: 'write'
-  # Required for closing a branch, see ref: https://docs.github.com/en/rest/overview/permissions-required-for-github-apps?apiVersion=2022-11-28#repository-permissions-for-contents
-  contents: 'write'
 
 jobs:
   expire:
     runs-on: 'ubuntu-latest'
+    outputs:
+      pulls: '${{ steps.close_pr.outputs.result }}'
     steps:
-      - uses: 'actions/github-script@98814c53be79b1d30f795b907e553d8679345975' # ratchet:actions/github-script@v6
+      - id: close_pr
+        uses: 'actions/github-script@98814c53be79b1d30f795b907e553d8679345975' # ratchet:actions/github-script@v6
         with:
-          # Token required for authentication when deleting a branch, see
-          # JavaScript example in ref: https://docs.github.com/en/rest/git/refs?apiVersion=2022-11-28#delete-a-reference
-          github-token: '${{ github.token }}'
-          result-encoding: 'string'
+          # # Token required for authentication when deleting a branch, see
+          # # JavaScript example in ref: https://docs.github.com/en/rest/git/refs?apiVersion=2022-11-28#delete-a-reference
+          # github-token: '${{ github.token }}'
           retries: 3
           script: |-
             const parts = String('${{ inputs.repo }}').split('/')
@@ -66,6 +94,8 @@ jobs:
 
             core.info(`Found ${pulls.data.length} pulls`);
 
+            let pulls = new Array();
+
             pulls.data.forEach(async (pull) => {
               const files = await github.rest.pulls.listFiles({
                 owner: repoOwner,
@@ -76,9 +106,19 @@ jobs:
               // Check if the PR is an AOD request by checking the AOD file existence.
               if (files.data.find(f => (f.filename === 'iam.yaml' || f.filename === 'tool.yaml'))) {
                 // Check if the PR is within the cutoff threshold
-                const updatedAt = new Date(Date.parse(pull['updated_at']));
+                // Get last committed at time from ref branch
+                const ref = pull['head']['ref']
+                const branch = await github.rest.repos.getBranch({
+                  owner: repoOwner,
+                  repo: repoName,
+                  branch: ref,
+                })
+                // Branch returns the latest commit info. See schema:
+                // https://docs.github.com/en/rest/branches/branches?apiVersion=2022-11-28#get-a-branch
+                const lastCommittedAt = branch['data']['commit']['commit']['committer']['date']
+                core.info(`#${pull['number']} lastCommittedAt (${lastCommittedAt})`);
 
-                if (now.getTime() - updatedAt.getTime() < cutoffMs) {
+                if (now.getTime() - new Date(Date.parse(lastCommittedAt)).getTime() < cutoffMs) {
                   core.info(`Skipping #${pull['number']} (${pull['title']}) - within threshold`);
                   return;
                 }
@@ -97,21 +137,16 @@ jobs:
                   owner: repoOwner,
                   repo: repoName,
                   issue_number: pull['number'],
-                  body: `**\`Access on Demand\`** - request closed and branch deleted due to inactivity for at least ${{ inputs.expiry_hours }} hours`,
+                  body: `**\`Access on Demand\`** - request closed and branch deleted due to inactivity (no new commit) for at least ${{ inputs.expiry_hours }} hours`,
                 });
 
-                core.info(`Deleting branch ${pull['head']['ref']}`);
-
-                // Delete branch.
-                // setTimeout(function() {
-                //  await github.rest.git.deleteRef({
-                //    owner: repoOwner,
-                //    repo: repoName,
-                //    ref: `heads/${pull['head']['ref']}`,
-                //  });
-                //}, 3600)
-
+                pulls.push(pull)
               } else {
                 core.info(`Skipping #${pull['number']} (${pull['title']}) - not an AOD request`);
               }
             });
+
+            return pulls;
+
+      - name: Get result
+        run: echo "${{steps.close_pr.outputs.result}}"
