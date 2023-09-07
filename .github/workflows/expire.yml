@@ -143,7 +143,7 @@ jobs:
             });
 
             core.info(`outter expiredPull ${expiredPulls}`);
-            return expiredPulls;
+            return await expiredPulls;
 
       - name: Get result
         run: echo "${{ steps.close_pr.outputs.result }}"
