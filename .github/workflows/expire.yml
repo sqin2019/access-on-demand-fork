@@ -135,7 +135,7 @@ jobs:
                 });
 
                 core.info(`pull ${pull}`);
-                expiredPulls.push(pull)
+                expiredPulls.push({pullNumber: pull['number'], pullBranch: pull['head']['ref']})
                 core.info(`expiredPull ${expiredPulls}`);
               } else {
                 core.info(`Skipping #${pull['number']} (${pull['title']}) - not an AOD request`);
