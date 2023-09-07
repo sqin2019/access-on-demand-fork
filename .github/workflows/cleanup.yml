@@ -77,7 +77,7 @@ jobs:
     # if: '${{ needs.review_status.outputs.REVIEW_DECISION == ''APPROVED'' }}'
     runs-on: 'ubuntu-latest'
     permissions:
-      contents: 'read'
+      contents: 'write'
       id-token: 'write'
       pull-requests: 'write'
     name: 'Handle AOD Request Cleanup'
