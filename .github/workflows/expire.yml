@@ -95,7 +95,7 @@ jobs:
 
             core.info(`Found ${pulls.data.length} pulls`);
 
-            let expiredPulls = new Array();
+            const expiredPulls = new Array();
 
             pulls.data.forEach(async (pull) => {
               const files = await github.rest.pulls.listFiles({
@@ -135,7 +135,7 @@ jobs:
                 });
 
                 core.info(`pull ${pull}`);
-                expiredPulls.push(pull['number'])
+                expiredPulls.push(pull)
                 core.info(`expiredPull ${expiredPulls}`);
               } else {
                 core.info(`Skipping #${pull['number']} (${pull['title']}) - not an AOD request`);
