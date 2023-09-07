@@ -142,7 +142,8 @@ jobs:
               }
             });
 
+            core.info(`outter expiredPull ${expiredPulls}`);
             return expiredPulls;
 
       - name: Get result
-        run: echo "${{steps.close_pr.outputs.result}}"
+        run: echo "${{ steps.close_pr.outputs.result }}"
