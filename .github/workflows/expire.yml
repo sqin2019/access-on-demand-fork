@@ -126,12 +126,12 @@ jobs:
 
                 core.info(`Closing #${pull['number']} (${pull['title']})`);
 
-                await github.rest.pulls.update({
-                  owner: repoOwner,
-                  repo: repoName,
-                  pull_number: pull['number'],
-                  state: 'closed',
-                });
+                # await github.rest.pulls.update({
+                #   owner: repoOwner,
+                #   repo: repoName,
+                #   pull_number: pull['number'],
+                #   state: 'closed',
+                # });
 
                 // Comment on closed PRs.
                 await github.rest.issues.createComment({
@@ -141,7 +141,9 @@ jobs:
                   body: `**\`Access on Demand\`** - request closed and branch deleted due to inactivity (no new commit) for at least ${{ inputs.expiry_hours }} hours`,
                 });
 
+                core.info(`pull ${pull}`);
                 expiredPulls.push(pull)
+                core.info(`expiredPull ${expiredPulls}`);
               } else {
                 core.info(`Skipping #${pull['number']} (${pull['title']}) - not an AOD request`);
               }
