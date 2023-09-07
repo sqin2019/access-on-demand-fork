@@ -27,34 +27,6 @@ on:
         type: 'number'
         default: 24
         required: false
-      # workload_identity_provider:
-      #   description: 'The full identifier of the Workload Identity Provider, including the project number, pool name, and provider name.'
-      #   type: 'string'
-      #   required: true
-      # service_account:
-      #   description: 'Email address or unique identifier of the Google Cloud service account for which to generate credentials.'
-      #   type: 'string'
-      #   required: true
-      # aod_cli_version:
-      #   description: 'The version of AOD CLI.'
-      #   type: 'string'
-      #   default: 'latest'
-      #   required: false
-      # go_version:
-      #   description: 'The version of Golang.'
-      #   type: 'string'
-      #   default: '1.21'
-      #   required: false
-      # pr_number:
-      #   description: "The number of the pull request that contains the AOD requests."
-      #   type: 'number'
-      #   default: ${{ github.event.pull_request.number }}
-      #   required: false
-      # branch:
-      #   description: "The branch of the pull request."
-      #   type: 'string'
-      #   default: ${{ github.event.pull_request.head.ref }}
-      #   required: false
 
 permissions:
   pull-requests: 'write'

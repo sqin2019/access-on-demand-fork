@@ -36,6 +36,16 @@ on:
         type: 'string'
         default: '1.21'
         required: false
+      pr_number:
+        description: "The number of the pull request that contains the AOD requests."
+        type: 'number'
+        default: ${{ github.event.pull_request.number }}
+        required: false
+      branch:
+        description: "The branch of the pull request."
+        type: 'string'
+        default: ${{ github.event.pull_request.head.ref }}
+        required: false
 
 env:
   IAM_ERROR_FILENAME: 'iam_error.txt'
@@ -59,7 +69,7 @@ jobs:
   #         GH_TOKEN: '${{ github.token }}'
   #       run: |
   #         repo=${{ github.repository }}
-  #         reviewDecision="$(gh api graphql -F owner=${{ github.repository_owner }} -F name=${repo##*/} -F pr_number=${{ github.event.pull_request.number }} -f query='
+  #         reviewDecision="$(gh api graphql -F owner=${{ github.repository_owner }} -F name=${repo##*/} -F pr_number=${{ inputs.pr_number }} -f query='
   #           query($name: String!, $owner: String!, $pr_number: Int!) {
   #             repository(owner: $owner, name: $name) {
   #               pullRequest(number: $pr_number) {
@@ -77,6 +87,7 @@ jobs:
     # if: '${{ needs.review_status.outputs.REVIEW_DECISION == ''APPROVED'' }}'
     runs-on: 'ubuntu-latest'
     permissions:
+      # Required for closing a branch, see ref: https://docs.github.com/en/rest/overview/permissions-required-for-github-apps?apiVersion=2022-11-28#repository-permissions-for-contents
       contents: 'write'
       id-token: 'write'
       pull-requests: 'write'
@@ -85,7 +96,7 @@ jobs:
       - name: 'Checkout Triggering Branch'
         uses: 'actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab' # ratchet:actions/checkout@v3
         with:
-          ref: '${{ github.event.pull_request.head.ref }}'
+          ref: '${{ inputs.branch }}'
       - name: 'Setup Go'
         uses: 'actions/setup-go@6edd4406fa81c3da01a34fa6f6343087c207a568' # ratchet:actions/setup-go@v3
         with:
@@ -150,7 +161,7 @@ jobs:
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: "${{ github.event.pull_request.number }}",
+              issue_number: "${{ inputs.pr_number }}",
               body: body,
             });
       - name: 'Tool Request Failure Cleanup Comment'
@@ -187,7 +198,7 @@ jobs:
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: "${{ github.event.pull_request.number }}",
+              issue_number: "${{ inputs.pr_number }}",
               body: body,
             });
       - name: 'Tool Request Not Found Comment'
@@ -200,7 +211,7 @@ jobs:
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: ${{ github.event.pull_request.number }},
+              issue_number: "${{ inputs.pr_number }}",
               body: `**\`Access on Demand\`** - 🟦 **\`Tool\`** request not found, skip cleanup.`,
             });
       - name: 'IAM Request Success Cleanup Comment'
@@ -229,7 +240,7 @@ jobs:
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: "${{ github.event.pull_request.number }}",
+              issue_number: "${{ inputs.pr_number }}",
               body: body,
             });
       - name: 'IAM Request Failure Cleanup Comment'
@@ -266,7 +277,7 @@ jobs:
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: "${{ github.event.pull_request.number }}",
+              issue_number: "${{ inputs.pr_number }}",
               body: body,
             });
       - name: 'IAM Request Not Found Comment'
@@ -279,7 +290,7 @@ jobs:
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: ${{ github.event.pull_request.number }},
+              issue_number: ${{ inputs.pr_number }},
               body: `**\`Access on Demand\`** - 🟦 **\`IAM\`** request not found, skip cleanup.`,
             });
       - name: 'Delete Branch'
@@ -293,6 +304,5 @@ jobs:
             await github.rest.git.deleteRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: `heads/${{ github.event.pull_request.head.ref }}`,
+              ref: `heads/${{ inputs.branch }}`,
             });
-            core.info(`Deleted branch ${{ github.event.pull_request.head.ref }}`);
