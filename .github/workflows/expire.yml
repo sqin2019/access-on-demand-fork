@@ -135,7 +135,7 @@ jobs:
                 });
 
                 core.info(`pull ${pull}`);
-                expiredPulls.push(pull)
+                expiredPulls.push(pull['number'])
                 core.info(`expiredPull ${expiredPulls}`);
               } else {
                 core.info(`Skipping #${pull['number']} (${pull['title']}) - not an AOD request`);
@@ -145,4 +145,4 @@ jobs:
             return expiredPulls;
 
       - name: Get result
-        run: echo "${{steps.close_pr.outputs.result}}[0].number"
+        run: echo "${{steps.close_pr.outputs.result}}"
