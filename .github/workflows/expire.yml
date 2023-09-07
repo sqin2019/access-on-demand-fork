@@ -68,9 +68,9 @@ jobs:
       - id: close_pr
         uses: 'actions/github-script@98814c53be79b1d30f795b907e553d8679345975' # ratchet:actions/github-script@v6
         with:
-          # # Token required for authentication when deleting a branch, see
-          # # JavaScript example in ref: https://docs.github.com/en/rest/git/refs?apiVersion=2022-11-28#delete-a-reference
-          # github-token: '${{ github.token }}'
+          # Token required for authentication when deleting a branch, see
+          # JavaScript example in ref: https://docs.github.com/en/rest/git/refs?apiVersion=2022-11-28#delete-a-reference
+          github-token: '${{ github.token }}'
           retries: 3
           script: |-
             const parts = String('${{ inputs.repo }}').split('/')
