@@ -295,7 +295,7 @@ jobs:
             });
       - name: 'Delete Branch'
         # Only delete branch when cleanups are skipped or successfully handled.
-        if: '${{ always() && steps.cleanup_iam.outcome != ''failure'' && steps.cleanup_tool.outcome != ''failure'' }}'
+        if: '${{ steps.cleanup_iam.outcome != ''failure'' && steps.cleanup_tool.outcome != ''failure'' }}'
         uses: 'actions/github-script@98814c53be79b1d30f795b907e553d8679345975' # ratchet:actions/github-script@v6
         with:
           github-token: '${{ github.token }}'
