@@ -120,6 +120,3 @@ jobs:
 
             core.info(`outter expiredPull ${expiredPulls}`);
             return expiredPulls;
-
-      - name: Get result
-        run: echo "${{ fromJson(steps.close_pr.outputs.result) }}"
