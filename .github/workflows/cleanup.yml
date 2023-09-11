@@ -53,41 +53,41 @@ env:
 
 jobs:
   # Check the current status of this pull request with respect to code review.
-  review_status:
-    runs-on: 'ubuntu-latest'
-    permissions:
-      pull-requests: 'read'
-    outputs:
-      REVIEW_DECISION: '${{ steps.get_review_decision.outputs.REVIEW_DECISION }}'
-    steps:
-      - id: 'get_review_decision'
-        env:
-          # Set the GH_TOKEN environment variable to use GitHub CLI in a GitHub Actions workflow.
-          # See ref: https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows
-          GH_TOKEN: '${{ github.token }}'
-        run: |
-          repo=${{ github.repository }}
-          reviewDecision="$(gh api graphql -F owner=${{ github.repository_owner }} -F name=${repo##*/} -F pr_number=${{ inputs.pr_number }} -f query='
-            query($name: String!, $owner: String!, $pr_number: Int!) {
-              repository(owner: $owner, name: $name) {
-                pullRequest(number: $pr_number) {
-                  reviewDecision
-                }
-              }
-            }
-          ' --jq '.data.repository.pullRequest.reviewDecision')"
+  # review_status:
+  #   runs-on: 'ubuntu-latest'
+  #   permissions:
+  #     pull-requests: 'read'
+  #   outputs:
+  #     REVIEW_DECISION: '${{ steps.get_review_decision.outputs.REVIEW_DECISION }}'
+  #   steps:
+  #     - id: 'get_review_decision'
+  #       env:
+  #         # Set the GH_TOKEN environment variable to use GitHub CLI in a GitHub Actions workflow.
+  #         # See ref: https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows
+  #         GH_TOKEN: '${{ github.token }}'
+  #       run: |
+  #         repo=${{ github.repository }}
+  #         reviewDecision="$(gh api graphql -F owner=${{ github.repository_owner }} -F name=${repo##*/} -F pr_number=${{ inputs.pr_number }} -f query='
+  #           query($name: String!, $owner: String!, $pr_number: Int!) {
+  #             repository(owner: $owner, name: $name) {
+  #               pullRequest(number: $pr_number) {
+  #                 reviewDecision
+  #               }
+  #             }
+  #           }
+  #         ' --jq '.data.repository.pullRequest.reviewDecision')"
 
-          echo REVIEW_DECISION=$reviewDecision >> $GITHUB_OUTPUT
+  #         echo REVIEW_DECISION=$reviewDecision >> $GITHUB_OUTPUT
 
   # Only run Tool request cleanup when the pull request is approved.
   cleanup:
-    needs: 'review_status'
-    if: '${{ needs.review_status.outputs.REVIEW_DECISION == ''APPROVED'' }}'
+    # needs: 'review_status'
+    # if: '${{ needs.review_status.outputs.REVIEW_DECISION == ''APPROVED'' }}'
     runs-on: 'ubuntu-latest'
     permissions:
       # Required for closing a branch, see ref: https://docs.github.com/en/rest/overview/permissions-required-for-github-apps?apiVersion=2022-11-28#repository-permissions-for-contents
       contents: 'write'
-      id-token: 'write'
+      # id-token: 'write'
       pull-requests: 'write'
     name: 'Handle AOD Request Cleanup'
     steps:
@@ -119,7 +119,7 @@ jobs:
         run: |
           touch ${{ runner.temp }}/${{ env.TOOL_ERROR_FILENAME }}
           touch ${{ runner.temp }}/${{ env.TOOL_OUT_FILENAME }}
-          aod tool cleanup -path ${{ env.TOOL_FILE_PATH }} \
+          aod tool handle -path ${{ env.TOOL_FILE_PATH }} \
           2> ${{ runner.temp }}/${{ env.TOOL_ERROR_FILENAME }} \
           > ${{ runner.temp }}/${{ env.TOOL_OUT_FILENAME }}
       - name: 'Handle IAM cleanup'
