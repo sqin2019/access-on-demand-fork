@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+      - 'main'
+
 
 # Don't cancel in progress since we don't want to have half-baked release.
 concurrency: '${{ github.workflow }}-${{ github.head_ref || github.ref }}-release'
