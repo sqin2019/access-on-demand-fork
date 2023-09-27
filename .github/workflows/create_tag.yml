@@ -33,5 +33,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: 'refs/tags/${{ inputs.tag}}',
-              sha: '${{ inputs.tag }}',
+              sha: '2f7d57cd534ac56b5728f68f6b85c5c7754f222b',
             })
