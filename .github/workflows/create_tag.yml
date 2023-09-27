@@ -28,3 +28,10 @@ jobs:
               type: 'commit',
               message: 'creating tags in wf'
             });
+
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ inputs.tag}}',
+              sha: '${{ inputs.tag }}',
+            })
