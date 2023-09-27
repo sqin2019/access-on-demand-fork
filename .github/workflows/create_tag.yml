@@ -26,4 +26,5 @@ jobs:
               tag: '${{ inputs.tag }}',
               object: '2f7d57cd534ac56b5728f68f6b85c5c7754f222b',
               type: 'commit',
+              message: 'creating tags in wf'
             });
