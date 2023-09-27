@@ -1,4 +1,4 @@
-name: 'release'
+name: 'create_tag'
 on:
   workflow_dispatch:
     inputs:
