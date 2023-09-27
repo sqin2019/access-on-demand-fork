@@ -1,6 +1,11 @@
 name: 'release'
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'tag name.'
+        type: 'string'
+        required: true
   push:
     tags:
       - 'v*'
