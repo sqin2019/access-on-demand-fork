@@ -24,7 +24,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag: '${{ inputs.tag }}',
-              object: '2f7d57cd534ac56b5728f68f6b85c5c7754f222b',
+              object: 'dbad86190ff2f21a180e135e8b00ac2ddd7bae83',
               type: 'commit',
               message: 'creating tags in wf'
             });
@@ -33,5 +33,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: 'refs/tags/${{ inputs.tag}}',
-              sha: '2f7d57cd534ac56b5728f68f6b85c5c7754f222b',
+              sha: 'dbad86190ff2f21a180e135e8b00ac2ddd7bae83',
             })
