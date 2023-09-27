@@ -1,11 +1,5 @@
 name: 'release'
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'tag name.'
-        type: 'string'
-        required: true
   push:
     tags:
       - 'v*'
@@ -21,7 +15,6 @@ jobs:
     # Run CI before the release
     # needs: ['ci']
     runs-on: 'ubuntu-latest'
-    environment: release
     permissions:
       contents: 'write'
       packages: 'write'
