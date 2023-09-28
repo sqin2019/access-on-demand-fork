@@ -1,6 +1,6 @@
-name: 'create_tag'
+name: 'reusable_create_tag'
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       tag:
         description: 'The name of the tag to be created.'
@@ -11,7 +11,10 @@ on:
         type: 'string'
         required: false
         default: 'main'
-
+      message:
+        description: 'Message for the tag.'
+        type: 'string'
+        required: false
 
 jobs:
   create-tag:
@@ -23,21 +26,35 @@ jobs:
       - name: 'create tag'
         uses: 'actions/github-script@98814c53be79b1d30f795b907e553d8679345975' # ratchet:actions/github-script@v6
         with:
+          # Use token minter access token.
           github-token: '${{ secrets.PAT }}'
           retries: '3'
           script: |+
+            core.info(`event: ${{ github.event }}`)
+            core.info(`sender: ${{ github.event.sender }}`)
+            core.info(`sender data: ${{ github.event.sender }}['data']`)
+            core.info(`event data: ${{ github.event }}['data']`)
+            // Get the head commit from branch.
+            const branch = await github.rest.repos.getBranch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: '${{ inputs.branch }}',
+            })
+            // Branch returns the latest commit info. See schema:
+            // https://docs.github.com/en/rest/branches/branches?apiVersion=2022-11-28#get-a-branch
+            const sha = branch['data']['commit']['sha']
             await github.rest.git.createTag({
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag: '${{ inputs.tag }}',
-              object: 'dbad86190ff2f21a180e135e8b00ac2ddd7bae83',
+              object: sha,
               type: 'commit',
-              message: 'creating tags in wf'
+              message: '${{ inputs.message }}'
             });
 
             await github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: 'refs/tags/${{ inputs.tag}}',
-              sha: 'dbad86190ff2f21a180e135e8b00ac2ddd7bae83',
+              sha: sha,
             })
