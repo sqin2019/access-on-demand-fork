@@ -39,7 +39,7 @@ jobs:
           retries: '3'
           script: |+
             let sha = '${{ github.sha }}'
-            if ('${{ inputs.branch }}' != 'main') {
+            if ('${{ inputs.branch }}' !== 'main') {
               // Get the head commit from branch.
               const branch = await github.rest.repos.getBranch({
                 owner: context.repo.owner,
