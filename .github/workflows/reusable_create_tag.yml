@@ -15,9 +15,6 @@ on:
         description: 'Message for the tag.'
         type: 'string'
         required: false
-      pat:
-        type: 'string'
-        required: true
 
 jobs:
   create-tag:
@@ -30,7 +27,7 @@ jobs:
         uses: 'actions/github-script@98814c53be79b1d30f795b907e553d8679345975' # ratchet:actions/github-script@v6
         with:
           # Use token minter access token.
-          github-token: '${{ inputs.pat }}'
+          github-token: '${{ github.token }}'
           retries: '3'
           script: |+
             core.info(`event: ${{ github.event }}`)
