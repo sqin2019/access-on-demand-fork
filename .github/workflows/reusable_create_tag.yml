@@ -15,11 +15,14 @@ on:
         description: 'Message for the tag.'
         type: 'string'
         required: false
+      env:
+        type: 'string'
+        required: true
 
 jobs:
   create-tag:
     runs-on: 'ubuntu-latest'
-    environment: release
+    environment: '${{ inputs.env }}'
     permissions:
       contents: 'write'
     steps:
@@ -35,24 +38,11 @@ jobs:
           github-token: '${{ github.token }}'
           retries: '3'
           script: |+
-            core.info(`event: ${{ github.event }}`)
-            core.info(`sender: ${{ github.event.sender }}`)
-            core.info(`sender data: ${{ github.event.sender }}['data']`)
-            core.info(`event data: ${{ github.event }}['data']`)
-            // Get the head commit from branch.
-            const branch = await github.rest.repos.getBranch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              branch: '${{ inputs.branch }}',
-            })
-            // Branch returns the latest commit info. See schema:
-            // https://docs.github.com/en/rest/branches/branches?apiVersion=2022-11-28#get-a-branch
-            const sha = branch['data']['commit']['sha']
             await github.rest.git.createTag({
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag: '${{ inputs.tag }}',
-              object: sha,
+              object: '${{ github.sha }}',
               type: 'commit',
               message: '${{ inputs.message }}'
             });
@@ -61,5 +51,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: 'refs/tags/${{ inputs.tag}}',
-              sha: sha,
+              sha: '${{ github.sha }}',
             })
