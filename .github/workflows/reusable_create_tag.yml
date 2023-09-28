@@ -38,11 +38,23 @@ jobs:
           github-token: '${{ github.token }}'
           retries: '3'
           script: |+
+            let sha = '${{ github.sha }}'
+            if ('${{ inputs.branch }}' != 'main') {
+              // Get the head commit from branch.
+              const branch = await github.rest.repos.getBranch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: '${{ inputs.branch }}',
+              })
+              // Branch returns the latest commit info. See schema:
+              // https://docs.github.com/en/rest/branches/branches?apiVersion=2022-11-28#get-a-branch
+              sha = branch['data']['commit']['sha']
+            }
             await github.rest.git.createTag({
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag: '${{ inputs.tag }}',
-              object: '${{ github.sha }}',
+              object: sha,
               type: 'commit',
               message: '${{ inputs.message }}'
             });
@@ -51,5 +63,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: 'refs/tags/${{ inputs.tag}}',
-              sha: '${{ github.sha }}',
+              sha: sha,
             })
