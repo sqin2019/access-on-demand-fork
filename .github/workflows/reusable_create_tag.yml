@@ -6,6 +6,11 @@ on:
         description: 'The name of the tag to be created.'
         type: 'string'
         required: true
+      annotated_tag:
+        description: 'Create an annotated tag in Git.'
+        type: boolean
+        default: true
+        required: false
       branch:
         description: 'The branch to create tag from.'
         type: 'string'
@@ -22,6 +27,7 @@ on:
 jobs:
   create-tag:
     runs-on: 'ubuntu-latest'
+    if: '${{ github.ref_name == github.event.repository.default_branch }}'
     environment: '${{ inputs.env }}'
     permissions:
       contents: 'write'
@@ -33,35 +39,55 @@ jobs:
           echo "$GITHUB_CONTEXT"
       - name: 'create tag'
         uses: 'actions/github-script@98814c53be79b1d30f795b907e553d8679345975' # ratchet:actions/github-script@v6
+        env:
+          BRANCH: '${{ inputs.branch }}'
+          TAG: '${{ inputs.tag }}'
+          ANNOTATED_TAG: '${{ inputs.annotated_tag }}'
+          MESSAGE: '${{ inputs.message }}'
         with:
-          # Use token minter access token.
           github-token: '${{ github.token }}'
           retries: '3'
           script: |+
+            const branch = process.env.BRANCH
+            const tag = process.env.TAG
+            const message = process.env.MESSAGE
+            const annotatedTag = process.env.ANNOTATED_TAG
+
             let sha = '${{ github.sha }}'
-            if ('${{ inputs.branch }}' !== 'main') {
-              // Get the head commit from branch.
-              const branch = await github.rest.repos.getBranch({
+            if (branch !== '${{ github.ref_name }}') {
+              core.info(`get branch (${{ github.ref_name }})`)
+              // Get branch.
+              const branchToTag = await github.rest.repos.getBranch({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                branch: '${{ inputs.branch }}',
+                branch: branch,
               })
               // Branch returns the latest commit info. See schema:
               // https://docs.github.com/en/rest/branches/branches?apiVersion=2022-11-28#get-a-branch
-              sha = branch['data']['commit']['sha']
+              sha = branchToTag['data']['commit']['sha']
+            } else {
+              core.info('skipped get branch')
             }
+
             await github.rest.git.createTag({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag: '${{ inputs.tag }}',
+              tag: tag,
               object: sha,
               type: 'commit',
-              message: '${{ inputs.message }}'
+              message: message,
             });
 
-            await github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/${{ inputs.tag}}',
-              sha: sha,
-            })
+            if (annotatedTag === 'true') {
+              // Create a reference for annotated tag. See reference:
+              // https://docs.github.com/en/rest/git/tags?apiVersion=2022-11-28#create-a-tag-object
+              await github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `refs/tags/${tag}`,
+                sha: sha,
+              })
+              core.info(`Created annotated tag (${tag}), branch (${branch}), commit (${sha}).`)
+            } else {
+              core.info(`Created lightweight tag (${tag}), branch (${branch}), commit (${sha}).`)
+            }
