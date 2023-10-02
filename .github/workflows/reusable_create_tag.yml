@@ -12,13 +12,14 @@ on:
         default: true
         required: false
       branch:
-        description: 'The branch to create tag from.'
+        description: 'The branch of the head commit to create tag on.'
         type: 'string'
+        default: '${{ github.event.repository.default_branch }}'
         required: false
-        default: 'main'
       message:
         description: 'Message for the tag.'
         type: 'string'
+        default: '${{ inputs.tag }}'
         required: false
       env:
         type: 'string'
@@ -52,6 +53,12 @@ jobs:
             const tag = process.env.TAG
             const message = process.env.MESSAGE
             const annotatedTag = process.env.ANNOTATED_TAG
+
+            // TODO(#215): Once prevent self-review in supported by GitHub, we can remove this condition.
+            if (branch != '${{ github.event.repository.default_branch }}') {
+              core.info(`Skip creating tag as currently we only support creating tags on repository default branch`)
+              return
+            }
 
             let sha = '${{ github.sha }}'
             if (branch !== '${{ github.ref_name }}') {
