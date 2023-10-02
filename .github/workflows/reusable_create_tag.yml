@@ -68,7 +68,7 @@ jobs:
             if (branch != '${{ github.event.repository.default_branch }}') {
               // echo `result: Skip creating tag on branch (${branch}) as currently we only support creating tags on repository default branch.` >> $GITHUB_STEP_SUMMARY
               core.info(`Skip creating tag as currently we only support creating tags on repository default branch`)
-              return `result: Skip creating tag on branch (${branch}) as currently we only support creating tags on repository default branch.`
+              core.setFailed(`branch (${branch}) is not the repository default branch (${{ github.event.repository.default_branch }}).`)
             }
 
             let sha = '${{ github.sha }}'
@@ -107,9 +107,9 @@ jobs:
               })
               // echo `result: Created annotated tag (${tag}), branch (${branch}), commit (${sha}).` >> $GITHUB_STEP_SUMMARY
               core.info(`Created annotated tag (${tag}), branch (${branch}), commit (${sha}).`)
-              return `result: Created annotated tag (${tag}), branch (${branch}), commit (${sha}).`
+              return `Created annotated tag (${tag}), branch (${branch}), commit (${sha}).`
             } else {
               // echo `result: Created lightweight tag (${tag}), branch (${branch}), commit (${sha}).` >> $GITHUB_STEP_SUMMARY
               core.info(`Created lightweight tag (${tag}), branch (${branch}), commit (${sha}).`)
-              return `result: Created lightweight tag (${tag}), branch (${branch}), commit (${sha}).`
+              return `Created lightweight tag (${tag}), branch (${branch}), commit (${sha}).`
             }
