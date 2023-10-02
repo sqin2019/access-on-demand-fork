@@ -14,12 +14,12 @@ on:
       branch:
         description: 'The branch of the head commit to create tag on.'
         type: 'string'
-        default: '${{ github.event.repository.default_branch }}'
+        default: 'main'
         required: false
       message:
         description: 'Message for the tag.'
         type: 'string'
-        default: '${{ inputs.tag }}'
+        # default: '${{ inputs.tag }}'
         required: false
       env:
         type: 'string'
