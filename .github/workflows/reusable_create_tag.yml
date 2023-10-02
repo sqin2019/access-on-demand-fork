@@ -25,6 +25,11 @@ on:
       env:
         type: 'string'
         required: true
+    outputs:
+      result:
+        description: 'Create tag result'
+        value: '${{ jobs.create-tag.outputs.result }}'
+
 
 jobs:
   create-tag:
@@ -33,13 +38,16 @@ jobs:
     environment: '${{ inputs.env }}'
     permissions:
       contents: 'write'
+    outputs:
+      result: '${{ steps.create-tag.outputs.result }}'
     steps:
       - name: Dump GitHub context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           echo "$GITHUB_CONTEXT"
-      - name: 'create tag'
+      - id: 'create-tag'
+        name: 'create tag'
         uses: 'actions/github-script@98814c53be79b1d30f795b907e553d8679345975' # ratchet:actions/github-script@v6
         env:
           BRANCH: '${{ inputs.branch || github.event.repository.default_branch }}'
@@ -49,6 +57,7 @@ jobs:
         with:
           github-token: '${{ github.token }}'
           retries: '3'
+          result-encoding: string
           script: |+
             const branch = process.env.BRANCH
             const tag = process.env.TAG
@@ -57,9 +66,9 @@ jobs:
 
             // TODO(#215): Once prevent self-review in supported by GitHub, we can remove this condition.
             if (branch != '${{ github.event.repository.default_branch }}') {
-              echo `result: Skip creating tag on branch (${branch}) as currently we only support creating tags on repository default branch.` >> $GITHUB_STEP_SUMMARY
+              // echo `result: Skip creating tag on branch (${branch}) as currently we only support creating tags on repository default branch.` >> $GITHUB_STEP_SUMMARY
               core.info(`Skip creating tag as currently we only support creating tags on repository default branch`)
-              return
+              return `result: Skip creating tag on branch (${branch}) as currently we only support creating tags on repository default branch.`
             }
 
             let sha = '${{ github.sha }}'
@@ -96,9 +105,11 @@ jobs:
                 ref: `refs/tags/${tag}`,
                 sha: sha,
               })
-              echo `result: Created annotated tag (${tag}), branch (${branch}), commit (${sha}).` >> $GITHUB_STEP_SUMMARY
+              // echo `result: Created annotated tag (${tag}), branch (${branch}), commit (${sha}).` >> $GITHUB_STEP_SUMMARY
               core.info(`Created annotated tag (${tag}), branch (${branch}), commit (${sha}).`)
+              return `result: Created annotated tag (${tag}), branch (${branch}), commit (${sha}).`
             } else {
-              echo `result: Created lightweight tag (${tag}), branch (${branch}), commit (${sha}).` >> $GITHUB_STEP_SUMMARY
+              // echo `result: Created lightweight tag (${tag}), branch (${branch}), commit (${sha}).` >> $GITHUB_STEP_SUMMARY
               core.info(`Created lightweight tag (${tag}), branch (${branch}), commit (${sha}).`)
+              return `result: Created lightweight tag (${tag}), branch (${branch}), commit (${sha}).`
             }
