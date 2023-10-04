@@ -9,7 +9,7 @@ on:
       annotated_tag:
         description: 'Create an annotated tag in Git.'
         type: boolean
-        # default: true
+        default: true
         required: false
       # Set the branch and message defaults when declaring environment variables
       # in the job since inputs from calling workflow and the current workflow
@@ -17,12 +17,12 @@ on:
       branch:
         description: 'The branch of the head commit to create tag on. Default is the default branch of the calling repository.'
         type: 'string'
-        default: 'tmp'
+        default: '${{ github.event.repository.default_branch }}'
         required: false
       message:
         description: 'Message for the tag. Default is the tag name.'
         type: 'string'
-        default: 'default message'
+        default: '${{ inputs.tag }}'
         required: false
       env:
         type: 'string'
@@ -34,10 +34,10 @@ on:
 
 
 env:
-  BRANCH: '${{ inputs.branch || github.event.repository.default_branch }}'
+  BRANCH: '${{ inputs.branch }}'
   TAG: '${{ inputs.tag }}'
   ANNOTATED_TAG: '${{ inputs.annotated_tag }}'
-  MESSAGE: '${{ inputs.message || inputs.tag }}'
+  MESSAGE: '${{ inputs.message }}'
 
 jobs:
   print-inputs:
