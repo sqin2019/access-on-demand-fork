@@ -22,7 +22,7 @@ on:
       message:
         description: 'Message for the tag. Default is the tag name.'
         type: 'string'
-        default: '${{ inputs.tag }}'
+        default: 'tmp'
         required: false
       env:
         type: 'string'
