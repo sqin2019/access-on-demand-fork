@@ -37,7 +37,7 @@ env:
   BRANCH: '${{ inputs.branch }}'
   TAG: '${{ inputs.tag }}'
   ANNOTATED_TAG: '${{ inputs.annotated_tag }}'
-  MESSAGE: '${{ inputs.message }}'
+  # MESSAGE: '${{ inputs.message }}'
 
 jobs:
   print-inputs:
@@ -49,7 +49,7 @@ jobs:
           echo "- tag: ${{ env.TAG }}" >> $GITHUB_STEP_SUMMARY
           echo "- branch: ${{ env.BRANCH }}" >> $GITHUB_STEP_SUMMARY
           echo "- annotated tag: ${{ env.ANNOTATED_TAG }}" >> $GITHUB_STEP_SUMMARY
-          echo "- message: ${{ env.MESSAGE }}" >> $GITHUB_STEP_SUMMARY
+          echo "- message: ${{ inputs.message }}" >> $GITHUB_STEP_SUMMARY
 
   create-tag:
     runs-on: 'ubuntu-latest'
