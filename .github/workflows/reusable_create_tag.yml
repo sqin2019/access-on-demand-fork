@@ -9,18 +9,20 @@ on:
       annotated_tag:
         description: 'Create an annotated tag in Git.'
         type: boolean
-        default: true
+        # default: true
         required: false
       # Set the branch and message defaults when declaring environment variables
       # in the job since inputs from calling workflow and the current workflow
       # are mixed, see issue: https://github.com/actions/runner/issues/2274.
       branch:
-        description: 'The branch of the head commit to create tag on. Default is the default branch of the calling repository'
+        description: 'The branch of the head commit to create tag on. Default is the default branch of the calling repository.'
         type: 'string'
+        default: 'tmp'
         required: false
       message:
         description: 'Message for the tag. Default is the tag name.'
         type: 'string'
+        default: 'default message'
         required: false
       env:
         type: 'string'
