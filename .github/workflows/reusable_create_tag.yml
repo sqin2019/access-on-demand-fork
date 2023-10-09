@@ -46,7 +46,7 @@ jobs:
       - name: job summary
         run: |
           echo "### Inputs" >> $GITHUB_STEP_SUMMARY
-          echo "- tag: ${TAG }" >> $GITHUB_STEP_SUMMARY
+          echo "- tag: ${TAG}" >> $GITHUB_STEP_SUMMARY
           echo "- branch: ${BRANCH}" >> $GITHUB_STEP_SUMMARY
           echo "- annotated tag: ${ANNOTATED_TAG}" >> $GITHUB_STEP_SUMMARY
           echo "- message: ${MESSAGE}" >> $GITHUB_STEP_SUMMARY
