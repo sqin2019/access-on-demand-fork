@@ -32,7 +32,7 @@ permissions:
 
 jobs:
   scancode_job:
-    uses: 'sqin2019/scancode@main' # ratchet:actions/checkout@v3
+    uses: 'sqin2019/scancode/.github/workflows/scancode.yml@main' # ratchet:actions/checkout@v3
     with:
       directory-to-scan: 'dir/${{ inputs.directory-to-scan }}'
       commands: '${{ inputs.commands }}'
