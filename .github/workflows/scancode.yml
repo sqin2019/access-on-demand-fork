@@ -27,7 +27,7 @@ permissions:
   contents: 'read'
 
 jobs:
-  scancode_job:
-    uses: 'sqin2019/scancode/.github/workflows/scancode.yml@main' # ratchet:actions/checkout@v3
+  scancode:
+    uses: 'abcxyz/pkg/.github/actions/scancode/action.yml@main' # ratchet:actions/checkout@v3
     with:
       branch: '${{ inputs.branch }}'
