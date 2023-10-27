@@ -39,6 +39,6 @@ jobs:
   scancode_job:
     uses: 'sqin2019/scancode/.github/workflows/scancode.yml@main' # ratchet:actions/checkout@v3
     with:
-      directory-to-scan: 'dir/${{ inputs.directory-to-scan }}'
+      directory-to-scan: '${{ inputs.directory-to-scan }}'
       commands: '${{ inputs.commands }}'
       branch: '${{ inputs.branch }}'
