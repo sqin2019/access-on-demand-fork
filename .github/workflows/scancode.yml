@@ -22,15 +22,6 @@ on:
         required: false
         type: 'string'
         default: 'main'
-      directory-to-scan:
-        description: 'Which directory to scan, omit to scan the entire repo.'
-        required: false
-        type: 'string'
-      commands:
-        description: 'Scancode commands'
-        required: false
-        type: 'string'
-        default: '--license --package --copyright --license-score=70'
 
 permissions:
   contents: 'read'
@@ -39,6 +30,4 @@ jobs:
   scancode_job:
     uses: 'sqin2019/scancode/.github/workflows/scancode.yml@main' # ratchet:actions/checkout@v3
     with:
-      directory-to-scan: '${{ inputs.directory-to-scan }}'
-      commands: '${{ inputs.commands }}'
       branch: '${{ inputs.branch }}'
