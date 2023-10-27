@@ -17,6 +17,11 @@ name: scancode
 on:
   workflow_dispatch:
     inputs:
+      branch:
+        description: 'branch'
+        required: false
+        type: 'string'
+        default: 'main'
       directory-to-scan:
         description: 'Which directory to scan, omit to scan the entire repo.'
         required: false
@@ -36,3 +41,4 @@ jobs:
     with:
       directory-to-scan: 'dir/${{ inputs.directory-to-scan }}'
       commands: '${{ inputs.commands }}'
+      branch: '${{ inputs.branch }}'
