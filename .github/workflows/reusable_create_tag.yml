@@ -79,12 +79,9 @@ jobs:
             const message = process.env.MESSAGE
             const annotatedTag = process.env.ANNOTATED_TAG
 
-            // TODO(#215): Once prevent self-review in supported by GitHub, we can remove this condition.
             if (branch != '${{ github.event.repository.default_branch }}') {
-              // echo `result: Skip creating tag on branch (${branch}) as currently we only support creating tags on repository default branch.` >> $GITHUB_STEP_SUMMARY
-              core.info(`Skip creating tag as currently we only support creating tags on repository default branch`)
-              core.setFailed(`branch (${branch}) is not the repository default branch (${{ github.event.repository.default_branch }}).`)
-              return
+              core.warning(`branch (${branch}) is not the repository default ` +
+              `branch (${{ github.event.repository.default_branch }}).`)
             }
 
             let sha = '${{ github.sha }}'

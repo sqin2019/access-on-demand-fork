@@ -28,6 +28,6 @@ permissions:
 
 jobs:
   scancode:
-    uses: 'abcxyz/pkg/.github/workflows/scancode.yml@main' # ratchet:actions/checkout@v3
+    uses: 'abcxyz/pkg/.github/workflows/scancode.yml@main' # pin tag or sha here.
     with:
       branch: '${{ inputs.branch }}'
