@@ -18,10 +18,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/abcxyz/pkg/cli"
 	"github.com/posener/complete/v2/predict"
 	"github.com/sqin2019/access-on-demand-fork/apis/v1alpha1"
 	"github.com/sqin2019/access-on-demand-fork/pkg/requestutil"
+
+	"github.com/abcxyz/pkg/cli"
 )
 
 var _ cli.Command = (*IAMValidateCommand)(nil)

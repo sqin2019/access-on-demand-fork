@@ -18,8 +18,9 @@ package cli
 import (
 	"context"
 
-	"github.com/abcxyz/pkg/cli"
 	"github.com/sqin2019/access-on-demand-fork/internal/version"
+
+	"github.com/abcxyz/pkg/cli"
 )
 
 // rootCmd defines the starting command structure.

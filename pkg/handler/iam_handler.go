@@ -107,7 +107,6 @@ func (h *IAMHandler) Do(ctx context.Context, r *v1alpha1.IAMRequestWrapper) (nps
 	return
 }
 
-
 // Do removes expired or duplicative IAM bindings added by AOD and adds requested IAM bindings to current IAM policy.
 func (h *IAMHandler) Cleanup(ctx context.Context, r *v1alpha1.IAMRequestWrapper) (nps []*v1alpha1.IAMResponse, retErr error) {
 	for _, p := range r.ResourcePolicies {

@@ -22,8 +22,8 @@ import (
 	"time"
 
 	"cloud.google.com/go/iam/apiv1/iampb"
+	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
 	"cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
-	"github.com/abcxyz/pkg/testutil"
 	"github.com/google/go-cmp/cmp"
 	"github.com/sethvargo/go-retry"
 	"github.com/sqin2019/access-on-demand-fork/apis/v1alpha1"
@@ -32,7 +32,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/testing/protocmp"
 
-	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
+	"github.com/abcxyz/pkg/testutil"
 )
 
 func TestDo(t *testing.T) {
