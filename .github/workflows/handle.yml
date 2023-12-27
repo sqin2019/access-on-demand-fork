@@ -30,8 +30,8 @@ on:
       aod_cli_version:
         description: 'The version of AOD CLI, without the "v" prefix, e.g. 0.1.2'
         type: 'string'
-        default: '0.1.2'
         required: false
+        default: 'latest'
       go_version:
         description: 'The version of Golang.'
         type: 'string'
@@ -105,14 +105,8 @@ jobs:
       - name: 'Set up Cloud SDK'
         if: '${{ hashFiles(''tool.yaml'') != '''' }}'
         uses: 'google-github-actions/setup-gcloud@e30db14379863a8c79331b04a9969f4c1e225e0b' # ratchet:google-github-actions/setup-gcloud@v1
-      - name: 'Setup AOD'
-        if: '${{ hashFiles(''iam.yaml'', ''tool.yaml'') != '''' }}'
-        uses: 'abcxyz/pkg/.github/actions/setup-binary@main' # ratchet:exclude
-        with:
-          download_url: 'https://github.com/abcxyz/access-on-demand/releases/download/v${{ inputs.aod_cli_version }}/aod_${{ inputs.aod_cli_version }}_linux_amd64.tar.gz'
-          install_path: '${{ runner.temp }}/.aod'
-          cache_key: '${{ runner.os }}_${{ runner.arch }}_aod_${{ inputs.aod_cli_version }}'
-          add_to_path: true
+      - name: 'Install AOD CLI'
+        run: 'go install github.com/sqin2019/access-on-demand-fork/cmd/aod@${{ inputs.aod_cli_version }}'
       # Duration labels need to be prefixed with "duration-", an example is "duration-2h".
       - name: 'Get Duration From Label'
         if: '${{ hashFiles(''iam.yaml'') != '''' }}'
@@ -139,8 +133,8 @@ jobs:
           -path ${{ env.IAM_FILE_PATH }} \
           -duration ${{ env.DURATION }} \
           -start-time ${{ env.START_TIME }} \
-          2> ${{ env.IAM_ERROR_FILENAME }} \
-          > ${{ env.IAM_OUT_FILENAME }}
+          2> >(tee ${{ env.IAM_ERROR_FILENAME }} >&2) \
+          1> >(tee ${{ env.IAM_OUT_FILENAME }})
       # Request will not be handled when tool.yaml file does not exist in the
       # case of a pull_request_review event, instead it prints out a notice.
       - name: 'Handle Tool Request'
@@ -151,8 +145,8 @@ jobs:
         run: |
           touch ${{ env.TOOL_ERROR_FILENAME }} ${{ env.TOOL_OUT_FILENAME }}
           aod tool do -path ${{ env.TOOL_FILE_PATH }} \
-          2> ${{ env.TOOL_ERROR_FILENAME }} \
-          > ${{ env.TOOL_OUT_FILENAME }}
+          2> >(tee ${{ env.TOOL_ERROR_FILENAME }} >&2) \
+          1> >(tee ${{ env.TOOL_OUT_FILENAME }})
 
       - name: 'IAM Request Comment'
         if: '${{ always() && hashFiles(''iam.yaml'') != '''' }}'
