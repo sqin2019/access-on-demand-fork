@@ -108,7 +108,7 @@ jobs:
                 repo: context.repo.repo,
                 tag: tag,
                 object: sha,
-                type: 'commit',
+                type: 'tag',
                 message: message,
               });
             } 
