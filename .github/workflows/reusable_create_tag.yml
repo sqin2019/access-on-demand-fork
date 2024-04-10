@@ -110,8 +110,13 @@ jobs:
                 object: sha,
                 type: 'tag',
                 message: message,
+                tagger: {
+                  name: "${{ github.actor }}",
+                  date: "'$(date -u +'%Y-%m-%dT%H:%M:%SZ')'"
+                },
+
               });
-            } 
+            }
             // Create a reference for annotated tag. See reference:
             // https://docs.github.com/en/rest/git/tags?apiVersion=2022-11-28#create-a-tag-object
             await github.rest.git.createRef({
