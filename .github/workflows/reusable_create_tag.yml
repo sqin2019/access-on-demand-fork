@@ -100,7 +100,7 @@ jobs:
               core.info('skipped get branch')
             }
 
-            await github.rest.git.createTag({
+            const result = await github.rest.git.createTag({
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag: tag,
@@ -108,6 +108,7 @@ jobs:
               type: 'commit',
               message: message,
             });
+            core.info(JSON.stringify(result))
 
             if (annotatedTag === 'true') {
               // Create a reference for annotated tag. See reference:
