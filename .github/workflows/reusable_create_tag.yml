@@ -112,7 +112,7 @@ jobs:
                 message: message,
                 tagger: {
                   name: "${{ github.actor }}",
-                  date: "'$(date -u +'%Y-%m-%dT%H:%M:%SZ')'"
+                  date: "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
                 },
 
               });
