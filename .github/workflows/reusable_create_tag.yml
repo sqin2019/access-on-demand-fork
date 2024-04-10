@@ -99,27 +99,28 @@ jobs:
             } else {
               core.info('skipped get branch')
             }
-
-            const result = await github.rest.git.createTag({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag: tag,
-              object: sha,
-              type: 'commit',
-              message: message,
-            });
-            core.info(JSON.stringify(result))
+            // core.info(JSON.stringify(result))
 
             if (annotatedTag === 'true') {
-              // Create a reference for annotated tag. See reference:
-              // https://docs.github.com/en/rest/git/tags?apiVersion=2022-11-28#create-a-tag-object
-              await github.rest.git.createRef({
+              // echo `result: Created annotated tag (${tag}), branch (${branch}), commit (${sha}).` >> $GITHUB_STEP_SUMMARY
+              await github.rest.git.createTag({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                ref: `refs/tags/${tag}`,
-                sha: sha,
-              })
-              // echo `result: Created annotated tag (${tag}), branch (${branch}), commit (${sha}).` >> $GITHUB_STEP_SUMMARY
+                tag: tag,
+                object: sha,
+                type: 'commit',
+                message: message,
+              });
+            } 
+            // Create a reference for annotated tag. See reference:
+            // https://docs.github.com/en/rest/git/tags?apiVersion=2022-11-28#create-a-tag-object
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/${tag}`,
+              sha: sha,
+            })
+            if (annotatedTag === 'true') {
               core.info(`Created annotated tag (${tag}), branch (${branch}), commit (${sha}).`)
               return `Created annotated tag (${tag}), branch (${branch}), commit (${sha}).`
             } else {
