@@ -112,8 +112,8 @@ jobs:
                 message: message,
                 tagger: {
                   name: "${{ github.actor }}",
-                  date: "${{ github.event.repository.pushed_at }}"
-                  email: "jon@example.com"
+                  date: "${{ github.event.repository.pushed_at }}",
+                  email: "jon@example.com",
                 },
               });
               core.info(JSON.stringify(result))
