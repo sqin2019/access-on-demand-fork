@@ -103,7 +103,7 @@ jobs:
 
             if (annotatedTag === 'true') {
               // echo `result: Created annotated tag (${tag}), branch (${branch}), commit (${sha}).` >> $GITHUB_STEP_SUMMARY
-              await github.rest.git.createTag({
+              result = await github.rest.git.createTag({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 tag: tag,
@@ -115,7 +115,7 @@ jobs:
                   date: "${{ github.event.repository.pushed_at }}"
                   email: "jon@example.com"
                 },
-
+                core.info(JSON.stringify(result))
               });
             }
             // Create a reference for annotated tag. See reference:
