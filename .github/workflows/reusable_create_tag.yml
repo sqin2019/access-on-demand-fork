@@ -115,6 +115,9 @@ jobs:
                   date: "${{ github.event.repository.pushed_at }}",
                   email: "jon@example.com",
                 },
+                headers: {
+                  "X-GitHub-Api-Version": "2022-11-28"
+                }
               });
               core.info(JSON.stringify(result))
             }
