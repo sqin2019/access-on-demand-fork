@@ -113,6 +113,7 @@ jobs:
                 tagger: {
                   name: "${{ github.actor }}",
                   date: "${{ github.event.repository.pushed_at }}"
+                  email: "jon@example.com"
                 },
 
               });
