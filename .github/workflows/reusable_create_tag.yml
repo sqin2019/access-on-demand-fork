@@ -100,29 +100,20 @@ jobs:
               core.info('skipped get branch')
             }
             // core.info(JSON.stringify(result))
-
+            
             if (annotatedTag === 'true') {
-              // echo `result: Created annotated tag (${tag}), branch (${branch}), commit (${sha}).` >> $GITHUB_STEP_SUMMARY
-              result = await github.rest.git.createTag({
+              // Create a tag object before creating a reference for annotated tag.
+              // See reference: https://docs.github.com/en/rest/git/tags?apiVersion=2022-11-28#create-a-tag-object
+              await github.rest.git.createTag({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 tag: tag,
                 object: sha,
-                type: 'tag',
+                type: 'commit',
                 message: message,
-                tagger: {
-                  name: "${{ github.actor }}",
-                  date: "${{ github.event.repository.pushed_at }}",
-                  email: "jon@example.com",
-                },
-                headers: {
-                  "X-GitHub-Api-Version": "2022-11-28"
-                }
               });
-              core.info(JSON.stringify(result))
             }
-            // Create a reference for annotated tag. See reference:
-            // https://docs.github.com/en/rest/git/tags?apiVersion=2022-11-28#create-a-tag-object
+
             await github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -130,13 +121,9 @@ jobs:
               sha: sha,
             })
             if (annotatedTag === 'true') {
-              core.info(`Created annotated tag (${tag}), branch (${branch}), commit (${sha}).`)
-              return `Created annotated tag (${tag}), branch (${branch}), commit (${sha}).`
-            } else {
-              // echo `result: Created lightweight tag (${tag}), branch (${branch}), commit (${sha}).` >> $GITHUB_STEP_SUMMARY
-              core.info(`Created lightweight tag (${tag}), branch (${branch}), commit (${sha}).`)
-              return `Created lightweight tag (${tag}), branch (${branch}), commit (${sha}).`
+              return `Created annotated tag (${tag}), branch (${branch}), commit (${sha}), message(${message}).`
             }
+            return `Created lightweight tag (${tag}), branch (${branch}), commit (${sha}), message(${message}).`
 
   print-outputs:
     runs-on: ubuntu-latest
